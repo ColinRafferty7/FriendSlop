@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 
 
@@ -18,7 +19,13 @@ public class BallController : MonoBehaviour
     [SerializeField] float maxVerticalSpeed = 15f;
     float ballRadius;
     Vector3 deltaDir;
-    
+    [SerializeField] Transform frontIndicator;
+    [SerializeField] float indicatorOffsetMultiplier = 1.5f;
+    [SerializeField] float indicatorSmoothSpeed = 8f;
+    public Vector3 Front { get; private set; } = Vector3.forward;
+    Vector3 lastInputDir = Vector3.forward;
+
+
 
     [System.Serializable]
     public class SurfaceDrag
@@ -42,6 +49,41 @@ public class BallController : MonoBehaviour
     float currentForceMultiplier = 1f;
     float currentTorqueMultiplier = 1f;
     bool currentIsSlipping = false;
+
+    List<AbilityBase> ownedAbilities = new List<AbilityBase>();
+    int currentAbilityIndex = -1;
+    AbilityBase currentAbility;
+    float cooldownTimer = 0f;
+    bool activatePressed = false;
+    int swapPressed = 0;
+
+    public void CollectAbility(AbilityBase prefab)
+    {
+        AbilityBase instance = Instantiate(prefab, transform);
+        instance.enabled = true;
+        ownedAbilities.Add(instance);
+
+        EquipByIndex(ownedAbilities.Count - 1);
+    }
+    public void SwapAbility(int direction)
+    {
+        if (ownedAbilities.Count == 0) return;
+
+        int newIndex = (currentAbilityIndex + direction + ownedAbilities.Count) % ownedAbilities.Count;
+        EquipByIndex(newIndex);
+    }
+    void EquipByIndex(int index)
+    {
+        if (currentAbility != null)
+            currentAbility.OnUnequip(gameObject);
+
+        currentAbilityIndex = index;
+        currentAbility = ownedAbilities[index];
+        cooldownTimer = 0f;
+
+        currentAbility.OnEquip(gameObject);
+        Debug.Log("Equipped: " + currentAbility.GetType().Name);
+    }
 
     void OnCollisionStay(Collision collision)
     {
@@ -108,15 +150,27 @@ public class BallController : MonoBehaviour
         {
             rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
         }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift)) activatePressed = true;
+        if (Input.GetKeyDown(KeyCode.Q))
+            swapPressed = -1;
+        else if (Input.GetKeyDown(KeyCode.E))
+            swapPressed = 1;
+
+        if (deltaDir.magnitude > 0.01f)
+        {
+            lastInputDir = deltaDir.normalized;
+        }
+
     }
     void FixedUpdate()
     {
-        Debug.Log(groundContacts);
-        Debug.Log(rb.angularDamping);
-        Debug.Log(rb.linearDamping);
-        Debug.Log(currentJumpMultiplier);
-        Debug.Log(currentForceMultiplier);
-        Debug.Log(currentTorqueMultiplier);
+        //Debug.Log(groundContacts);
+        //Debug.Log(rb.angularDamping);
+        //Debug.Log(rb.linearDamping);
+        //Debug.Log(currentJumpMultiplier);
+        //Debug.Log(currentForceMultiplier);
+        //Debug.Log(currentTorqueMultiplier);
         Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
@@ -147,6 +201,40 @@ public class BallController : MonoBehaviour
         if (rb.angularVelocity.magnitude > maxAngularVelocity)
         {
             rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
+        }
+
+
+        if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
+
+        if (cooldownTimer > 0) cooldownTimer -= Time.fixedDeltaTime;
+
+        if (currentAbility != null &&
+            (currentAbility.Type == AbilityType.Passive || currentAbility.Type == AbilityType.ActiveAndPassive))
+        {
+            currentAbility.PassiveTick(gameObject);
+        }
+
+        if (activatePressed && currentAbility != null && cooldownTimer <= 0 &&
+            (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
+        {
+            currentAbility.Activate(gameObject);
+            cooldownTimer = currentAbility.Cooldown;
+        }
+
+        activatePressed = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (frontIndicator != null)
+        {
+            Front = Vector3.Slerp(Front, lastInputDir, indicatorSmoothSpeed * Time.deltaTime);
+
+            Vector3 targetPos = transform.position + Front * (ballRadius * indicatorOffsetMultiplier);
+            Quaternion targetRot = Quaternion.LookRotation(Front, Vector3.up);
+
+            frontIndicator.position = targetPos;
+            frontIndicator.rotation = targetRot;
         }
     }
 }
