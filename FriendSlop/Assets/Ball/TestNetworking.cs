@@ -7,13 +7,13 @@ public class TestNetworking : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.H))
         {
-            Debug.Log("Host Start" + NetworkManager.Singleton.StartHost());
+            Debug.Log("Host Start: " + NetworkManager.Singleton.StartHost());
             
         }
 
         if (Input.GetKeyDown(KeyCode.C))
         {
-            Debug.Log("Client Start" + NetworkManager.Singleton.StartClient());
+            Debug.Log("Client Start: " + NetworkManager.Singleton.StartClient());
         }
     }
     

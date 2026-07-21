@@ -1,7 +1,7 @@
-using System.Collections.Specialized;
+using Unity.Netcode;
 using UnityEngine;
 
-public class BallController : MonoBehaviour
+public class BallController : NetworkBehaviour
 {
     [SerializeField] private Rigidbody rb;
     void Start()
@@ -11,7 +11,9 @@ public class BallController : MonoBehaviour
 
     void Update()
     {
-        Vector3 dir = new Vector3(Input.GetAxisRaw("Horizontal")*10, rb.linearVelocity.y , Input.GetAxisRaw("Vertical")*10);  
+        if (!IsOwner) return;
+
+        Vector3 dir = new Vector3(Input.GetAxisRaw("Horizontal")*3, rb.linearVelocity.y , Input.GetAxisRaw("Vertical")*10);  
         rb.linearVelocity = dir;
     }
 }

@@ -13,9 +13,11 @@ GameObject:
   - component: {fileID: 7226762818460454960}
   - component: {fileID: 769198845011230392}
   - component: {fileID: 2162058194869315609}
-  - component: {fileID: 5753837583952901809}
   - component: {fileID: 880059537025133747}
-  - component: {fileID: 717472978160939939}
+  - component: {fileID: 5753837583952901809}
+  - component: {fileID: 7175358759483490113}
+  - component: {fileID: -3477035223364235876}
+  - component: {fileID: 1313594582782059892}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -102,7 +104,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8177512797024792689}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 4aca1585fe7afd14c8bec38565cca7ee, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -142,20 +144,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &5753837583952901809
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8177512797024792689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd0e2bc31cc0e7a40918c99c97c62e3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BallController
-  rb: {fileID: 2162058194869315609}
+  m_CollisionDetection: 2
 --- !u!114 &880059537025133747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,20 +158,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
   GlobalObjectIdHash: 2264736479
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  InScenePlacedSourceGlobalObjectIdHash: 2264736479
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   <InScenePlaced>k__BackingField: 0
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &717472978160939939
+--- !u!114 &5753837583952901809
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -191,6 +180,84 @@ MonoBehaviour:
   m_GameObject: {fileID: 8177512797024792689}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35a646c3337154d4c95e835aa919e06a, type: 3}
+  m_Script: {fileID: 11500000, guid: fd0e2bc31cc0e7a40918c99c97c62e3a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TestNetworking
+  m_EditorClassIdentifier: Assembly-CSharp::BallController
+  ShowTopMostFoldoutHeaderGroup: 1
+  rb: {fileID: 2162058194869315609}
+--- !u!114 &7175358759483490113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8177512797024792689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 0
+  AutoOwnerAuthorityTickOffset: 1
+  PositionInterpolationType: 0
+  RotationInterpolationType: 0
+  ScaleInterpolationType: 0
+  PositionLerpSmoothing: 1
+  PositionMaxInterpolationTime: 0.1
+  RotationLerpSmoothing: 1
+  RotationMaxInterpolationTime: 0.1
+  ScaleLerpSmoothing: 1
+  ScaleMaxInterpolationTime: 0.1
+  AuthorityMode: 1
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
+--- !u!114 &-3477035223364235876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8177512797024792689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c17b5ddafc19a4b9318a7e85e2014c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestRPC
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &1313594582782059892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8177512797024792689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
