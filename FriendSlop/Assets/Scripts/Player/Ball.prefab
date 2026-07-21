@@ -183,8 +183,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd0e2bc31cc0e7a40918c99c97c62e3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BallController
-  ShowTopMostFoldoutHeaderGroup: 1
+  isPlayer: 0
+  col: {fileID: 0}
+  speed: 0.1
   rb: {fileID: 2162058194869315609}
+  jumpForce: 10
+  maxHorizontalSpeed: 5
+  torqueAmount: 5
+  maxAngularVelocity: 5
+  airControl: 0.25
+  maxVerticalSpeed: 15
+  frontIndicator: {fileID: 0}
+  indicatorOffsetMultiplier: 1.5
+  indicatorSmoothSpeed: 8
+  surfaceDrags: []
+  airAngularDrag: 0
+  defaultJumpMultiplier: 1
+  defaultForceMultiplier: 1
+  defaultTorqueMultiplier: 1
 --- !u!114 &7175358759483490113
 MonoBehaviour:
   m_ObjectHideFlags: 0

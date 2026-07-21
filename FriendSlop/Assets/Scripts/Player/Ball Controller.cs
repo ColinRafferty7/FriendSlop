@@ -1,11 +1,12 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 
 
 
 
-public class BallController : MonoBehaviour
+public class BallController : NetworkBehaviour
 {
     [SerializeField] bool isPlayer = false;
     [SerializeField] private SphereCollider col;
@@ -87,7 +88,6 @@ public class BallController : MonoBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-        Debug.Log("Collision!");
         groundContacts = true;
         PhysicsMaterial mat = collision.collider.sharedMaterial;
         if (mat != null)
@@ -144,6 +144,7 @@ public class BallController : MonoBehaviour
     }
     void Update()
     {
+        if (!IsOwner) return;
         if (!isPlayer) return;
         deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         if (groundContacts == true && Input.GetKeyDown(KeyCode.Space))
@@ -165,6 +166,7 @@ public class BallController : MonoBehaviour
     }
     void FixedUpdate()
     {
+        if (!IsOwner) return;
         //Debug.Log(groundContacts);
         //Debug.Log(rb.angularDamping);
         //Debug.Log(rb.linearDamping);
@@ -173,36 +175,10 @@ public class BallController : MonoBehaviour
         //Debug.Log(currentTorqueMultiplier);
         Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
-        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         deltaDir.Normalize();
         float verticalVelocity = rb.linearVelocity.y;
-        if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)
-        {
-            float angularSpeed = horizontalVelocity.magnitude / ballRadius;
-            Vector3 rotationAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
-            rb.angularVelocity = rotationAxis * angularSpeed;
-        }
-        if (groundContacts == true)
-        {
-            rb.AddForce(deltaDir * currentForceMultiplier * speed);
-            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
-        }
-        if (groundContacts == false)
-        {
-            rb.AddForce(deltaDir * currentForceMultiplier * speed * airControl);
-            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier * airControl * 0.5f, ForceMode.Force);
-        }
-        if (horizontalVelocity.magnitude > maxHorizontalSpeed)
-        {
-            horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
-        }
-        verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
-        rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
-        if (rb.angularVelocity.magnitude > maxAngularVelocity)
-        {
-            rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
-        }
 
+        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir);
 
         if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
 
@@ -222,6 +198,40 @@ public class BallController : MonoBehaviour
         }
 
         activatePressed = false;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta)
+    {
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        float angularSpeed = 0f;
+        if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)
+        {
+            angularSpeed = horizontalVelocity.magnitude / ballRadius;
+            Vector3 rotationAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
+            rb.angularVelocity = rotationAxis * angularSpeed;
+        }
+        if (groundContacts == true)
+        {
+            rb.AddForce(delta * currentForceMultiplier * speed);
+            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
+        }
+        else
+        {
+            rb.AddForce(delta * currentForceMultiplier * speed * airControl);
+            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier * airControl * 0.5f, ForceMode.Force);
+        }
+        horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        if (horizontalVelocity.magnitude > maxHorizontalSpeed)
+        {
+            horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
+        }
+        verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
+        rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
+        if (rb.angularVelocity.magnitude > maxAngularVelocity)
+        {
+            rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
+        }
     }
 
     private void LateUpdate()

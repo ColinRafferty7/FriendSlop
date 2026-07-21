@@ -7,7 +7,6 @@ public class RpcTest : NetworkBehaviour
     {
         if (!IsServer && IsOwner) //Only send an RPC to the server from the client that owns the NetworkObject of this NetworkBehaviour instance
         {
-            Debug.Log("Works");
             ServerOnlyRpc(0, NetworkObjectId);
         }
     }
