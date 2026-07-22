@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 15024, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Host + Client
+  m_Name: Host Client
   m_EditorClassIdentifier: UnityEditor.MultiplayerModule.dll::Unity.Multiplayer.PlayMode.Editor.OrchestratedScenario
   m_Description: 
   m_EnableEditors: 1
@@ -32,28 +32,28 @@ MonoBehaviour:
       serializedVersion: 2
       Hash: c16915d1f789adfc5d3631ffc39c502e
     m_InstanceItems:
-    - rid: 6840727406631452932
-    - rid: 6840727406631452934
+    - rid: 6840727543563943936
+    - rid: 6840727543563943938
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6840727406631452932
+    - rid: 6840727543563943936
       type: {class: 'InstanceItem`2[[Unity.Multiplayer.PlayMode.Editor.MainEditorController, UnityEditor.MultiplayerModule],[Unity.Multiplayer.PlayMode.Editor.MainEditorController/InstanceSettings, UnityEditor.MultiplayerModule]]', ns: Unity.Multiplayer.PlayMode.Editor, asm: UnityEditor.MultiplayerModule}
       data:
-        m_Id: 7dc5e208ac68419fa6fed705bbf690eb
+        m_Id: cc09f35d9d7d41d9b53cca94c04db87e
         m_Name: Main Editor
         m_RunMode: 0
         m_Settings:
           PlayerTag: 
           RoleMask: 1
-          InitialScene: {fileID: 102900000, guid: 2cb3ce01547e3d7459f82fabe4b23359, type: 3}
+          InitialScene: {fileID: 102900000, guid: cc748e865129bdf49a512bcb1dc4adfd, type: 3}
         m_Decorators: []
-    - rid: 6840727406631452934
+    - rid: 6840727543563943938
       type: {class: 'InstanceItem`2[[Unity.Multiplayer.PlayMode.Editor.CloneEditorController, UnityEditor.MultiplayerModule],[Unity.Multiplayer.PlayMode.Editor.CloneEditorController/InstanceSettings, UnityEditor.MultiplayerModule]]', ns: Unity.Multiplayer.PlayMode.Editor, asm: UnityEditor.MultiplayerModule}
       data:
-        m_Id: 0f800cc395d84859aedddc337d849288
+        m_Id: 0f4e489a26f3477ab986c2ab2860d14f
         m_Name: Player 2
         m_RunMode: 0
         m_Settings:
