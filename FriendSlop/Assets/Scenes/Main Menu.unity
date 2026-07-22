@@ -595,7 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d95951fc908161418c167921906909b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  gamename: Multiplayer
+  gamename: Test Map
   enteredCode: {fileID: 253481552}
   codeText: {fileID: 2008296923}
 --- !u!4 &549841028

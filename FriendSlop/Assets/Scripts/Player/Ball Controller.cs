@@ -163,6 +163,11 @@ public class BallController : NetworkBehaviour
             lastInputDir = deltaDir.normalized;
         }
 
+        // Basic Respawn Function
+        if (transform.position.y < -10f)
+        {
+            transform.position = Vector3.zero;
+        }
     }
     void FixedUpdate()
     {
