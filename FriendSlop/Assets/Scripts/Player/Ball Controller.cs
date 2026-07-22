@@ -19,6 +19,7 @@ public class BallController : NetworkBehaviour
     [SerializeField] float airControl = 0.25f;
     [SerializeField] float maxVerticalSpeed = 15f;
     float ballRadius;
+    public float BallRadius => ballRadius;
     Vector3 deltaDir;
     [SerializeField] Transform frontIndicator;
     [SerializeField] float indicatorOffsetMultiplier = 1.5f;
@@ -57,6 +58,40 @@ public class BallController : NetworkBehaviour
     float cooldownTimer = 0f;
     bool activatePressed = false;
     int swapPressed = 0;
+
+    public GameObject FindClosestTargetInFront(float searchRadius)
+    {
+        Vector3 origin = transform.position;
+        Collider[] candidates = Physics.OverlapSphere(origin, searchRadius);
+
+        GameObject closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var col in candidates)
+        {
+            if (col.gameObject == gameObject) continue;
+            if (col.attachedRigidbody == null) continue;
+
+            Vector3 toTarget = col.transform.position - origin;
+            toTarget.y = 0;
+
+            if (toTarget.magnitude < 0.01f) continue;
+
+            Vector3 dirToTarget = toTarget.normalized;
+            float dot = Vector3.Dot(Front, dirToTarget);
+
+            if (dot > 0f)
+            {
+                float dist = toTarget.magnitude;
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closest = col.gameObject;
+                }
+            }
+        }
+        return closest;
+    }
 
     public void CollectAbility(AbilityBase prefab)
     {

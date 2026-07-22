@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9088197238172516030}
   - component: {fileID: 8454753986279427542}
   m_Layer: 0
-  m_Name: AoE Push
+  m_Name: Ability_AoEPush
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
