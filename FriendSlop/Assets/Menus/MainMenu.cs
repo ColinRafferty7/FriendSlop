@@ -16,11 +16,13 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] private string gamename;
     [SerializeField] private InputField enteredCode;
+    [SerializeField] private Text codeText;
 
     public async void HostGame()
     {
         string code = await StartHostWithRelay();
         Debug.Log(code);
+        codeText.text = "Code: " + code;
         NetworkManager.Singleton.SceneManager.LoadScene(gamename, LoadSceneMode.Single);
     }
 
