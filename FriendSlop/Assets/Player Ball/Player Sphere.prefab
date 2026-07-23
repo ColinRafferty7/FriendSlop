@@ -378,7 +378,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
@@ -475,43 +475,54 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   isPlayer: 1
   col: {fileID: 5671199889652238412}
-  speed: 200
   rb: {fileID: 4579209932181427402}
-  jumpForce: 50
-  maxHorizontalSpeed: 5
   torqueAmount: 5
-  maxAngularVelocity: 5
+  maxAngularVelocity: 1
   airControl: 0.5
   maxVerticalSpeed: 50
+  baseSpeed: 200
+  baseJumpForce: 100
+  baseMaxHorizontalSpeed: 5
+  baseMass: 20
   frontIndicator: {fileID: 5209117732065110345}
   indicatorOffsetMultiplier: 1.5
   indicatorSmoothSpeed: 20
   surfaceDrags:
   - isSlippingSurface: 0
+    isStickySurface: 0
     material: {fileID: 13400000, guid: 2013cb4280c71ce4fb49e61d598aa5dc, type: 2}
-    angularDrag: 2
-    linearDrag: 0
+    linearFriction: 0.5
+    angularFriction: 0
     forceMultiplier: 1
     jumpMultiplier: 1
     torqueMultiplier: 0
+    maxAngularVelocityOverride: 1
   - isSlippingSurface: 1
+    isStickySurface: 0
     material: {fileID: 13400000, guid: e2f57d5c12c320f408f32d452c6248e5, type: 2}
-    angularDrag: 0
-    linearDrag: 0
+    linearFriction: 0.1
+    angularFriction: 0.1
     forceMultiplier: 0.4
     jumpMultiplier: 1
     torqueMultiplier: 15
+    maxAngularVelocityOverride: 5
   - isSlippingSurface: 0
+    isStickySurface: 1
     material: {fileID: 13400000, guid: 9647e8dc5246a5b4c82535aa1d5829bd, type: 2}
-    angularDrag: 25
-    linearDrag: 0
-    forceMultiplier: 1
-    jumpMultiplier: 0.5
+    linearFriction: 5
+    angularFriction: 0.1
+    forceMultiplier: 0.5
+    jumpMultiplier: 0
     torqueMultiplier: 0
+    maxAngularVelocityOverride: 1
   airAngularDrag: 0
   defaultJumpMultiplier: 1
   defaultForceMultiplier: 1
   defaultTorqueMultiplier: 1
+  defaultAngularFriction: 1
+  defaultLinearFriction: 1
+  currentAngularFriction: 1
+  currentLinearFriction: 1
 --- !u!114 &9199071303485360575
 MonoBehaviour:
   m_ObjectHideFlags: 0

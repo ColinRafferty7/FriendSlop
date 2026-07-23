@@ -46,4 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AoePull
   cooldown: 3
   pullForce: 50
+  upwardForce: 10
   pullRadius: 5

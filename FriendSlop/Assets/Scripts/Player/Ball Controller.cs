@@ -5,20 +5,28 @@ using Unity.Netcode;
 
 
 
+public enum StatType { Speed, JumpForce, Size }
+
+[System.Serializable]
 
 public class BallController : NetworkBehaviour
 {
     [SerializeField] bool isPlayer = false;
     [SerializeField] private SphereCollider col;
-    [SerializeField] float speed = 0.1f;
+    float speed = 0.1f;
     [SerializeField] private Rigidbody rb;
-    [SerializeField] float jumpForce = 10f;
-    [SerializeField] float maxHorizontalSpeed = 5f;
+    float jumpForce = 10f;
+    float maxHorizontalSpeed = 5f;
     [SerializeField] float torqueAmount = 5f;
     [SerializeField] float maxAngularVelocity = 5f;
     [SerializeField] float airControl = 0.25f;
-    [SerializeField] float maxVerticalSpeed = 15f;
+    [SerializeField] float maxVerticalSpeed = 15f; 
+    [SerializeField] float baseSpeed = 0.1f;
+    [SerializeField] float baseJumpForce = 10f;
+    [SerializeField] float baseMaxHorizontalSpeed = 5f;
+    [SerializeField] float baseMass = 20f;
     float ballRadius;
+    List<ActiveBoost> activeBoosts = new List<ActiveBoost>();
     public float BallRadius => ballRadius;
     Vector3 deltaDir;
     [SerializeField] Transform frontIndicator;
@@ -30,27 +38,37 @@ public class BallController : NetworkBehaviour
 
 
     [System.Serializable]
-    public class SurfaceDrag
+    public class Surface
     {
         public bool isSlippingSurface = false;
+        public bool isStickySurface = false;
         public PhysicsMaterial material;
-        public float angularDrag;
-        public float linearDrag;
+        public float linearFriction = 1f;
+        public float angularFriction = 0.1f;
         public float forceMultiplier = 1f;
         public float jumpMultiplier = 1f;
-        public float torqueMultiplier = 0f;
+        public float torqueMultiplier = 0f;   
+        public float maxAngularVelocityOverride = 1f;
+
     }
 
-    public SurfaceDrag[] surfaceDrags;
+    public Surface[] surfaceDrags;
     public float airAngularDrag = 0f;
     public float defaultJumpMultiplier = 1f;
     public float defaultForceMultiplier = 1f;
     public float defaultTorqueMultiplier = 1f;
+    public float defaultAngularFriction = 1f;
+    public float defaultLinearFriction = 1f;
     bool groundContacts = false;
     float currentJumpMultiplier = 1f;
     float currentForceMultiplier = 1f;
     float currentTorqueMultiplier = 1f;
+    public float currentAngularFriction = 1f;
+    public float currentLinearFriction = 1f;
     bool currentIsSlipping = false;
+    bool currentIsSticky = false;
+    float currentMaxAngularVelocityOverride = 1f;
+    Vector3 currentSurfaceNormal = Vector3.up;
 
     List<AbilityBase> ownedAbilities = new List<AbilityBase>();
     int currentAbilityIndex = -1;
@@ -58,6 +76,73 @@ public class BallController : NetworkBehaviour
     float cooldownTimer = 0f;
     bool activatePressed = false;
     int swapPressed = 0;
+    Vector3 baseScale;
+
+    [System.Serializable]
+    public class ActiveBoost
+    {
+        public StatType statType;
+        public float multiplier;
+        public float remainingTime;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void RequestApplyTimedBoostRpc(StatType statType, float multiplier, float duration)
+    {
+        ApplyTimedBoost(statType, multiplier, duration);
+    }
+
+    public void ApplyTimedBoost(StatType statType, float multiplier, float duration)
+    {
+        activeBoosts.Add(new ActiveBoost { statType = statType, multiplier = multiplier, remainingTime = duration });
+        RecalculateStats();
+    }
+
+
+    void RecalculateStats()
+    {
+        float speedMult = 1f, jumpMult = 1f, maxSpeedMult = 1f, sizeMult = 1f;
+
+        foreach (var boost in activeBoosts)
+        {
+            switch (boost.statType)
+            {
+                case StatType.Speed: 
+                    speedMult *= boost.multiplier;
+                    maxSpeedMult *= boost.multiplier;
+                    break;
+                case StatType.JumpForce: jumpMult *= boost.multiplier; break;
+                case StatType.Size: 
+                    sizeMult *= boost.multiplier; 
+                    break;
+            }
+        }
+
+        speed = baseSpeed * speedMult;
+        jumpForce = baseJumpForce * jumpMult;
+        maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
+        Debug.Log(speed);
+        transform.localScale = baseScale * sizeMult;
+        rb.mass = baseMass * sizeMult;
+        RecalculateRadius();
+    }
+    void TickBoosts(float deltaTime)
+    {
+        bool anyExpired = false;
+
+        for (int i = activeBoosts.Count - 1; i >= 0; i--)
+        {
+            activeBoosts[i].remainingTime -= deltaTime;
+            if (activeBoosts[i].remainingTime <= 0f)
+            {
+                activeBoosts.RemoveAt(i);
+                anyExpired = true;
+            }
+        }
+
+        if (anyExpired) RecalculateStats();
+    }
+
 
     public GameObject FindClosestTargetInFront(float searchRadius)
     {
@@ -91,6 +176,14 @@ public class BallController : NetworkBehaviour
             }
         }
         return closest;
+    }
+    public void RecalculateRadius()
+    {
+        ballRadius = col.radius * transform.lossyScale.x;
+        if (!currentIsSlipping)
+        {
+            maxAngularVelocity = maxHorizontalSpeed / ballRadius;
+        }
     }
 
     public void CollectAbility(AbilityBase prefab)
@@ -128,6 +221,12 @@ public class BallController : NetworkBehaviour
         if (mat != null)
         {
             ApplySurfaceValues(mat);
+
+            Vector3 avgNormal = Vector3.zero;
+            foreach (var contact in collision.contacts)
+                avgNormal += contact.normal;
+            avgNormal.Normalize();
+            currentSurfaceNormal = avgNormal;
         }
     }
     void OnCollisionExit(Collision collision)
@@ -138,10 +237,14 @@ public class BallController : NetworkBehaviour
             if(groundContacts == false)
             {
                 rb.angularDamping = airAngularDrag;
+                rb.linearDamping = defaultLinearFriction;
                 currentJumpMultiplier = defaultJumpMultiplier;
                 currentForceMultiplier = defaultForceMultiplier;
+                currentAngularFriction = defaultAngularFriction;
+                currentLinearFriction = defaultLinearFriction;
                 currentTorqueMultiplier = defaultTorqueMultiplier;
                 currentIsSlipping = false;
+                currentIsSticky = false;
             }
         }
     }
@@ -151,31 +254,44 @@ public class BallController : NetworkBehaviour
         {
             if (entry.material == mat)
             {
-                if (rb.angularDamping != entry.angularDrag)
-                    rb.angularDamping = entry.angularDrag;
-                if (rb.linearDamping != entry.linearDrag)
-                    rb.linearDamping = entry.linearDrag;
                 if (currentJumpMultiplier != entry.jumpMultiplier)
                     currentJumpMultiplier = entry.jumpMultiplier;
                 if (currentForceMultiplier != entry.forceMultiplier)
                     currentForceMultiplier = entry.forceMultiplier;
+                if (currentAngularFriction != entry.angularFriction)
+                    currentAngularFriction = entry.angularFriction;
                 if (currentTorqueMultiplier != entry.torqueMultiplier)
                     currentTorqueMultiplier = entry.torqueMultiplier;
                 if (currentIsSlipping != entry.isSlippingSurface)
                     currentIsSlipping = entry.isSlippingSurface;
+                if (rb.linearDamping != entry.linearFriction)             
+                    rb.linearDamping = entry.linearFriction;
+                if (currentIsSticky != entry.isStickySurface)
+                    currentIsSticky = entry.isStickySurface;
+                if (currentMaxAngularVelocityOverride != entry.maxAngularVelocityOverride)
+                    currentMaxAngularVelocityOverride = entry.maxAngularVelocityOverride;
+                if (currentIsSlipping)
+                    maxAngularVelocity = currentMaxAngularVelocityOverride;
+                else
+                    RecalculateRadius();
                 return;
             }
         }
         rb.angularDamping = airAngularDrag;
         currentJumpMultiplier = defaultJumpMultiplier;
         currentForceMultiplier = defaultForceMultiplier;
+        rb.linearDamping = defaultLinearFriction;
+        currentAngularFriction = defaultAngularFriction;
         currentTorqueMultiplier = defaultTorqueMultiplier;
+        currentMaxAngularVelocityOverride = 1f;
         currentIsSlipping = false;
+        currentIsSticky = false;
     }
     void Start()
     {
         rb.angularDamping = airAngularDrag;
-        ballRadius = col.radius * transform.lossyScale.x;
+        baseScale = transform.localScale;
+        RecalculateStats();
     }
     void Update()
     {
@@ -213,7 +329,7 @@ public class BallController : NetworkBehaviour
         deltaDir.Normalize();
         float verticalVelocity = rb.linearVelocity.y;
 
-        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir);
+        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir, currentSurfaceNormal);
 
         if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
 
@@ -236,8 +352,9 @@ public class BallController : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta)
+    private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta, Vector3 surfaceNormal)
     {
+        TickBoosts(Time.fixedDeltaTime);
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         float angularSpeed = 0f;
         if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)
@@ -246,10 +363,28 @@ public class BallController : NetworkBehaviour
             Vector3 rotationAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
             rb.angularVelocity = rotationAxis * angularSpeed;
         }
+        if (currentIsSticky)
+        {
+            Vector3 gravityForce = Physics.gravity * rb.mass;
+            Vector3 slideComponent = gravityForce - Vector3.Project(gravityForce, surfaceNormal);
+
+            float inputAlignment = delta.magnitude > 0.01f ? Vector3.Dot(delta.normalized, slideComponent.normalized) : -1f;
+
+            if (inputAlignment < 0.3f)
+            {
+                rb.AddForce(-slideComponent);
+            }
+        }
         if (groundContacts == true)
         {
+            Debug.Log(speed);
             rb.AddForce(delta * currentForceMultiplier * speed);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
+
+            if (rb.angularVelocity != null && currentIsSlipping)
+            {
+                rb.AddTorque((-rb.angularVelocity).normalized * currentAngularFriction);
+            }
         }
         else
         {

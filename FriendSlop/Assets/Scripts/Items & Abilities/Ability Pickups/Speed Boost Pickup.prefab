@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2329640583271850704
+--- !u!1 &9177846717331350675
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,49 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7397427266009851610}
-  - component: {fileID: 4521843807837201366}
-  - component: {fileID: 7413290044633419444}
-  - component: {fileID: 1670814101504531634}
-  - component: {fileID: 2278415201932647965}
-  - component: {fileID: 4686528017919899613}
+  - component: {fileID: 2096201963135657755}
+  - component: {fileID: 4857648809258041496}
+  - component: {fileID: 4862756704322542014}
+  - component: {fileID: 7746639585797009984}
+  - component: {fileID: 8526470966785490422}
+  - component: {fileID: 3293784806279795408}
   m_Layer: 0
-  m_Name: Boxing Glove Ability Pickup
+  m_Name: Speed Boost Pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7397427266009851610
+--- !u!4 &2096201963135657755
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.08, y: 0.7, z: -7.189}
+  m_LocalPosition: {x: 0.013196535, y: 0.5836041, z: -8.547373}
   m_LocalScale: {x: 0.1672083, y: 0.1672083, z: 0.1672083}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &4521843807837201366
+--- !u!33 &4857648809258041496
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &7413290044633419444
+--- !u!23 &4862756704322542014
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -93,13 +93,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1670814101504531634
+--- !u!65 &7746639585797009984
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -114,43 +114,45 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2278415201932647965
+--- !u!114 &8526470966785490422
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1812476800
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2031376537
+  InScenePlacedSourceGlobalObjectIdHash: 1728392302
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   <InScenePlaced>k__BackingField: 0
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &4686528017919899613
+--- !u!114 &3293784806279795408
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2329640583271850704}
+  m_GameObject: {fileID: 9177846717331350675}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e799068900d0f4e40a68eda8e5640e9d, type: 3}
+  m_Script: {fileID: 11500000, guid: 9af4615b2b4ca0a4d8743fc1fd126f42, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AbilityPickup
+  m_EditorClassIdentifier: Assembly-CSharp::TimedBoostPickup
   ShowTopMostFoldoutHeaderGroup: 1
-  abilityPrefab: {fileID: 7493357347027461384, guid: 25963d1d84e338845a8de8c9d62e647c, type: 3}
+  statType: 0
+  multiplier: 2
+  duration: 10

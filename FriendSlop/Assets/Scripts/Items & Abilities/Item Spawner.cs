@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Netcode;
 
-public class ItemSpawner : MonoBehaviour
+public class ItemSpawner : NetworkBehaviour
 {
     [SerializeField] bool isRandom;
     [SerializeField] float spawnDelay;
@@ -12,18 +13,19 @@ public class ItemSpawner : MonoBehaviour
     public class Item
     {
         public bool isOn;
-        public GameObject itemPrefab; 
-        public float rarity;          
+        public GameObject itemPrefab;
+        public float rarity;
     }
 
     [SerializeField] Item[] items;
-
     float timer = 0f;
     int nextFixedIndex = 0;
     GameObject currentItem;
 
     void Update()
     {
+        if (!IsServer) return;   
+
         if (currentItem != null) return;
 
         timer += Time.deltaTime;
@@ -45,6 +47,12 @@ public class ItemSpawner : MonoBehaviour
         Vector3 pos = basePos + Vector3.up * spawnHeightOffset;
 
         currentItem = Instantiate(prefabToSpawn, pos, Quaternion.identity);
+
+        NetworkObject netObj = currentItem.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn();  
+        }
     }
 
     GameObject GetRandomItem()
