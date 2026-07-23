@@ -2,9 +2,9 @@ using UnityEngine;
 
 public enum AbilityType
 {
-    Active,          // only does something when triggered
-    Passive,         // only does something continuously while equipped
-    ActiveAndPassive // does both
+    Active,          
+    Passive,
+    ActiveAndPassive 
 }
 public abstract class AbilityBase : MonoBehaviour
 {
