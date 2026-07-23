@@ -158,12 +158,15 @@ MonoBehaviour:
   spawnPoint: {fileID: 0}
   spawnHeightOffset: 0.5
   items:
-  - isOn: 1
+  - isOn: 0
     itemPrefab: {fileID: 5611127798629940544, guid: 8e85069edf8079d4ea7df68e46154a09, type: 3}
     rarity: 5
-  - isOn: 1
+  - isOn: 0
     itemPrefab: {fileID: 2329640583271850704, guid: 6a42b297e5da13049bdb0a64693f4a74, type: 3}
     rarity: 10
+  - isOn: 0
+    itemPrefab: {fileID: 9147261096372003907, guid: 3e7a69b348b7b1347aca2f0bbf1894fc, type: 3}
+    rarity: 10
   - isOn: 1
-    itemPrefab: {fileID: 949042396975907648, guid: 0929ace8f9aaa7c49938a523b057b807, type: 3}
+    itemPrefab: {fileID: 5622949443255209143, guid: 7f8014e2f71e4b44580b17e8b8f77546, type: 3}
     rarity: 10

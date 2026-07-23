@@ -1,0 +1,34 @@
+using UnityEngine;
+
+public class HookAbility : AbilityBase
+{
+    public override AbilityType Type => AbilityType.Active;
+    [SerializeField] float range = 6f;
+    [SerializeField] float speed = 6f;
+    [SerializeField] float spawnOffsetMultiplier = 1.3f;
+    [SerializeField] GameObject hookPrefab;
+
+    public override void Activate(GameObject user)
+    {
+        BallController ball = user.GetComponent<BallController>();
+        if (ball == null || hookPrefab == null) return;
+
+        GameObject target = ball.FindClosestTargetInFront(range);
+
+        Vector3 direction;
+        if (target != null)
+        {
+            direction = target.transform.position - user.transform.position;
+            direction.y = 0;
+            direction.Normalize();
+        }
+        else
+        {
+            direction = ball.Front;
+        }
+
+        GameObject hookObj = Instantiate(hookPrefab, user.transform.position, Quaternion.LookRotation(direction, Vector3.up));
+        HookProjectile hook = hookObj.GetComponent<HookProjectile>();
+        hook.Init(user, direction, range, speed, ball.BallRadius, spawnOffsetMultiplier);
+    }
+}

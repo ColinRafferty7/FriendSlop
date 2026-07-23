@@ -25,6 +25,8 @@ public class BallController : NetworkBehaviour
     [SerializeField] float baseJumpForce = 10f;
     [SerializeField] float baseMaxHorizontalSpeed = 5f;
     [SerializeField] float baseMass = 20f;
+    [SerializeField] int maxOwnedAbilities = 3;
+    [SerializeField] bool replaceOldestWhenFull = true;
     float ballRadius;
     List<ActiveBoost> activeBoosts = new List<ActiveBoost>();
     public float BallRadius => ballRadius;
@@ -94,7 +96,17 @@ public class BallController : NetworkBehaviour
 
     public void ApplyTimedBoost(StatType statType, float multiplier, float duration)
     {
-        activeBoosts.Add(new ActiveBoost { statType = statType, multiplier = multiplier, remainingTime = duration });
+        ActiveBoost existing = activeBoosts.Find(b => b.statType == statType);
+
+        if (existing != null)
+        {
+            existing.remainingTime = duration; 
+        }
+        else
+        {
+            activeBoosts.Add(new ActiveBoost { statType = statType, multiplier = multiplier, remainingTime = duration });
+        }
+
         RecalculateStats();
     }
 
@@ -188,6 +200,28 @@ public class BallController : NetworkBehaviour
 
     public void CollectAbility(AbilityBase prefab)
     {
+        if (ownedAbilities.Count >= maxOwnedAbilities)
+        {
+            int indexToRemove = replaceOldestWhenFull ? 0 : currentAbilityIndex;
+
+            if (indexToRemove < 0 || indexToRemove >= ownedAbilities.Count)
+            {
+                indexToRemove = 0; // safety fallback, shouldn't normally trigger
+            }
+
+            AbilityBase removed = ownedAbilities[indexToRemove];
+
+            if (removed == currentAbility)
+            {
+                currentAbility.OnUnequip(gameObject);
+                currentAbility = null;
+                currentAbilityIndex = -1;
+            }
+
+            Destroy(removed.gameObject);
+            ownedAbilities.RemoveAt(indexToRemove);
+        }
+
         AbilityBase instance = Instantiate(prefab, transform);
         instance.enabled = true;
         ownedAbilities.Add(instance);
@@ -324,7 +358,10 @@ public class BallController : NetworkBehaviour
         //Debug.Log(currentJumpMultiplier);
         //Debug.Log(currentForceMultiplier);
         //Debug.Log(currentTorqueMultiplier);
-        Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        if (isPlayer)
+        {
+            Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        }
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
         deltaDir.Normalize();
         float verticalVelocity = rb.linearVelocity.y;
