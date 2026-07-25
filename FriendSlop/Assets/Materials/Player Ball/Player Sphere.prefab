@@ -242,6 +242,7 @@ GameObject:
   - component: {fileID: -4645308801868793636}
   - component: {fileID: -6382130528330964693}
   - component: {fileID: 9199071303485360575}
+  - component: {fileID: 6794983978138688053}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -484,6 +485,8 @@ MonoBehaviour:
   baseJumpForce: 100
   baseMaxHorizontalSpeed: 5
   baseMass: 20
+  maxOwnedAbilities: 3
+  replaceOldestWhenFull: 1
   frontIndicator: {fileID: 5209117732065110345}
   indicatorOffsetMultiplier: 1.5
   indicatorSmoothSpeed: 20
@@ -537,3 +540,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InputControl
   ShowTopMostFoldoutHeaderGroup: 1
   rb: {fileID: 4579209932181427402}
+--- !u!114 &6794983978138688053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9cec88cb9dd3694a92527933113c82c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerColorPicker
+  ShowTopMostFoldoutHeaderGroup: 1
+  ballRenderer: {fileID: 2558198393808217373}
+  ColorIndex:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: -1
