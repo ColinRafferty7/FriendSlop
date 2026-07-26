@@ -20,7 +20,7 @@ public class BallController : NetworkBehaviour
     [SerializeField] float torqueAmount = 5f;
     [SerializeField] float maxAngularVelocity = 5f;
     [SerializeField] float airControl = 0.25f;
-    [SerializeField] float maxVerticalSpeed = 15f; 
+    [SerializeField] float maxVerticalSpeed = 15f;
     [SerializeField] float baseSpeed = 0.1f;
     [SerializeField] float baseJumpForce = 10f;
     [SerializeField] float baseMaxHorizontalSpeed = 5f;
@@ -38,23 +38,17 @@ public class BallController : NetworkBehaviour
     Vector3 lastInputDir = Vector3.forward;
 
 
+    Collider lastGroundCollider;
+    SurfaceData currentSurfaceData;
 
-    [System.Serializable]
-    public class Surface
-    {
-        public bool isSlippingSurface = false;
-        public bool isStickySurface = false;
-        public PhysicsMaterial material;
-        public float linearFriction = 1f;
-        public float angularFriction = 0.1f;
-        public float forceMultiplier = 1f;
-        public float jumpMultiplier = 1f;
-        public float torqueMultiplier = 0f;   
-        public float maxAngularVelocityOverride = 1f;
+    [SerializeField]
+    [Tooltip("Maps PhysicsMaterial assets to SurfaceData for floors that don't have a SurfaceIdentifier component.")]
+    SurfaceMaterialRegistry surfaceRegistry;
 
-    }
+    [SerializeField]
+    [Tooltip("Contacts steeper than this angle (degrees from straight up) are treated as walls, not floor/slopes, and don't count as ground contact or apply surface data.")]
+    float maxSurfaceAngle = 60f;
 
-    public Surface[] surfaceDrags;
     public float airAngularDrag = 0f;
     public float defaultJumpMultiplier = 1f;
     public float defaultForceMultiplier = 1f;
@@ -100,7 +94,7 @@ public class BallController : NetworkBehaviour
 
         if (existing != null)
         {
-            existing.remainingTime = duration; 
+            existing.remainingTime = duration;
         }
         else
         {
@@ -119,13 +113,13 @@ public class BallController : NetworkBehaviour
         {
             switch (boost.statType)
             {
-                case StatType.Speed: 
+                case StatType.Speed:
                     speedMult *= boost.multiplier;
                     maxSpeedMult *= boost.multiplier;
                     break;
                 case StatType.JumpForce: jumpMult *= boost.multiplier; break;
-                case StatType.Size: 
-                    sizeMult *= boost.multiplier; 
+                case StatType.Size:
+                    sizeMult *= boost.multiplier;
                     break;
             }
         }
@@ -206,7 +200,7 @@ public class BallController : NetworkBehaviour
 
             if (indexToRemove < 0 || indexToRemove >= ownedAbilities.Count)
             {
-                indexToRemove = 0; // safety fallback, shouldn't normally trigger
+                indexToRemove = 0; 
             }
 
             AbilityBase removed = ownedAbilities[indexToRemove];
@@ -250,67 +244,90 @@ public class BallController : NetworkBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-        groundContacts = true;
-        PhysicsMaterial mat = collision.collider.sharedMaterial;
-        if (mat != null)
-        {
-            ApplySurfaceValues(mat);
 
-            Vector3 avgNormal = Vector3.zero;
-            foreach (var contact in collision.contacts)
-                avgNormal += contact.normal;
-            avgNormal.Normalize();
-            currentSurfaceNormal = avgNormal;
+        Vector3 floorNormalSum = Vector3.zero;
+        int floorContactCount = 0;
+
+        foreach (var contact in collision.contacts)
+        {
+            float angleFromUp = Vector3.Angle(contact.normal, Vector3.up);
+            if (angleFromUp <= maxSurfaceAngle)
+            {
+                floorNormalSum += contact.normal;
+                floorContactCount++;
+            }
         }
+
+        if (floorContactCount == 0) return;
+
+        groundContacts = true;
+
+
+        if (collision.collider != lastGroundCollider)
+        {
+            lastGroundCollider = collision.collider;
+
+
+            SurfaceIdentifier identifier = collision.collider.GetComponent<SurfaceIdentifier>();
+            if (identifier != null)
+            {
+                currentSurfaceData = identifier.surfaceData;
+            }
+
+            else if (surfaceRegistry != null)
+            {
+                currentSurfaceData = surfaceRegistry.GetSurfaceData(collision.collider.sharedMaterial);
+            }
+            else
+            {
+                currentSurfaceData = null;
+            }
+        }
+
+        ApplySurfaceValues(currentSurfaceData);
+
+        currentSurfaceNormal = (floorNormalSum / floorContactCount).normalized;
     }
     void OnCollisionExit(Collision collision)
     {
-        if (collision.collider.sharedMaterial != null)
+        if (collision.collider == lastGroundCollider)
         {
+            lastGroundCollider = null;
+            currentSurfaceData = null;
+
             groundContacts = false;
-            if(groundContacts == false)
-            {
-                rb.angularDamping = airAngularDrag;
-                rb.linearDamping = defaultLinearFriction;
-                currentJumpMultiplier = defaultJumpMultiplier;
-                currentForceMultiplier = defaultForceMultiplier;
-                currentAngularFriction = defaultAngularFriction;
-                currentLinearFriction = defaultLinearFriction;
-                currentTorqueMultiplier = defaultTorqueMultiplier;
-                currentIsSlipping = false;
-                currentIsSticky = false;
-            }
+            rb.angularDamping = airAngularDrag;
+            rb.linearDamping = defaultLinearFriction;
+            currentJumpMultiplier = defaultJumpMultiplier;
+            currentForceMultiplier = defaultForceMultiplier;
+            currentAngularFriction = defaultAngularFriction;
+            currentLinearFriction = defaultLinearFriction;
+            currentTorqueMultiplier = defaultTorqueMultiplier;
+            currentIsSlipping = false;
+            currentIsSticky = false;
         }
     }
-    void ApplySurfaceValues(PhysicsMaterial mat)
+    void ApplySurfaceValues(SurfaceData data)
     {
-        foreach (var entry in surfaceDrags)
+        if (data != null)
         {
-            if (entry.material == mat)
-            {
-                if (currentJumpMultiplier != entry.jumpMultiplier)
-                    currentJumpMultiplier = entry.jumpMultiplier;
-                if (currentForceMultiplier != entry.forceMultiplier)
-                    currentForceMultiplier = entry.forceMultiplier;
-                if (currentAngularFriction != entry.angularFriction)
-                    currentAngularFriction = entry.angularFriction;
-                if (currentTorqueMultiplier != entry.torqueMultiplier)
-                    currentTorqueMultiplier = entry.torqueMultiplier;
-                if (currentIsSlipping != entry.isSlippingSurface)
-                    currentIsSlipping = entry.isSlippingSurface;
-                if (rb.linearDamping != entry.linearFriction)             
-                    rb.linearDamping = entry.linearFriction;
-                if (currentIsSticky != entry.isStickySurface)
-                    currentIsSticky = entry.isStickySurface;
-                if (currentMaxAngularVelocityOverride != entry.maxAngularVelocityOverride)
-                    currentMaxAngularVelocityOverride = entry.maxAngularVelocityOverride;
-                if (currentIsSlipping)
-                    maxAngularVelocity = currentMaxAngularVelocityOverride;
-                else
-                    RecalculateRadius();
-                return;
-            }
+            currentJumpMultiplier = data.jumpMultiplier;
+            currentForceMultiplier = data.forceMultiplier;
+            currentAngularFriction = data.angularFriction;
+            currentTorqueMultiplier = data.torqueMultiplier;
+            currentIsSlipping = data.isSlippingSurface;
+            rb.linearDamping = data.linearFriction;
+            currentIsSticky = data.isStickySurface;
+            currentMaxAngularVelocityOverride = data.maxAngularVelocityOverride;
+
+            if (currentIsSlipping)
+                maxAngularVelocity = currentMaxAngularVelocityOverride;
+            else
+                RecalculateRadius();
+
+            return;
         }
+
         rb.angularDamping = airAngularDrag;
         currentJumpMultiplier = defaultJumpMultiplier;
         currentForceMultiplier = defaultForceMultiplier;

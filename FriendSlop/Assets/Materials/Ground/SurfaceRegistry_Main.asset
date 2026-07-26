@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a347b2a8027c60b4ebc976a08821c4df, type: 3}
+  m_Name: SurfaceRegistry_Main
+  m_EditorClassIdentifier: Assembly-CSharp::SurfaceMaterialRegistry
+  mappings:
+  - physicsMaterial: {fileID: 13400000, guid: 2013cb4280c71ce4fb49e61d598aa5dc, type: 2}
+    surfaceData: {fileID: 11400000, guid: b0ad284a7f17f204bb66fc51affa6fd4, type: 2}
+  - physicsMaterial: {fileID: 13400000, guid: e2f57d5c12c320f408f32d452c6248e5, type: 2}
+    surfaceData: {fileID: 11400000, guid: b0a96829864e7974a9114f4e96d437cb, type: 2}
+  - physicsMaterial: {fileID: 13400000, guid: 9647e8dc5246a5b4c82535aa1d5829bd, type: 2}
+    surfaceData: {fileID: 11400000, guid: 869a12a6c1c582a4a9dc7d07454c9cad, type: 2}

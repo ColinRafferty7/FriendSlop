@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18da344f124147f4ba626ba23fac9851, type: 3}
+  m_Name: SD_Sticky
+  m_EditorClassIdentifier: Assembly-CSharp::SurfaceData
+  isSlippingSurface: 0
+  isStickySurface: 1
+  linearFriction: 5
+  angularFriction: 0.1
+  forceMultiplier: 0.5
+  jumpMultiplier: 0
+  torqueMultiplier: 0
+  maxAngularVelocityOverride: 1
