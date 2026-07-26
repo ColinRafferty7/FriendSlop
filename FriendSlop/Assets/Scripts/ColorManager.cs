@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-
+/// <summary>
+/// Server-authoritative tracker of which color index is claimed by which client.
+/// </summary>
 public class ColorManager : NetworkBehaviour
 {
     public static ColorManager Instance { get; private set; }
@@ -10,7 +12,7 @@ public class ColorManager : NetworkBehaviour
     [Tooltip("Colors players can choose from. Index in this list = colorIndex used everywhere else.")]
     public List<Color> palette = new List<Color>();
 
-
+ 
     private const ulong Unclaimed = ulong.MaxValue;
 
     private NetworkList<ulong> colorOwners;
@@ -56,7 +58,10 @@ public class ColorManager : NetworkBehaviour
         return owner != Unclaimed && owner != clientId;
     }
 
-
+    /// <summary>
+    /// Server-only: attempts to claim colorIndex for clientId, freeing any color that
+    /// clientId previously held. Returns true if the claim succeeded.
+    /// </summary>
     public bool TryClaimColor(int colorIndex, ulong clientId)
     {
         if (!IsServer) return false;

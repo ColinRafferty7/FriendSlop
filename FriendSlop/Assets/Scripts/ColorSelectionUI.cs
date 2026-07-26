@@ -28,7 +28,9 @@ public class ColorSelectionUI : MonoBehaviour
 
             if (ColorManager.Instance != null && index < ColorManager.Instance.palette.Count)
             {
-                colorButtons[i].swatch.color = ColorManager.Instance.palette[index];
+                Color paletteColor = ColorManager.Instance.palette[index];
+                
+                colorButtons[i].swatch.color = new Color(paletteColor.r, paletteColor.g, paletteColor.b, 1f);
             }
         }
 

@@ -44,7 +44,20 @@ public class PlayerColorPicker : NetworkBehaviour
         if (ballRenderer == null || ColorManager.Instance == null) return;
         if (index < 0 || index >= ColorManager.Instance.palette.Count) return;
 
-        ballRenderer.material.color = ColorManager.Instance.palette[index];
+        Color targetColor = ColorManager.Instance.palette[index];
+        Material mat = ballRenderer.material;
+
+
+
+
+        if (mat.HasProperty("_BaseColor"))
+        {
+            mat.SetColor("_BaseColor", targetColor);
+        }
+        else
+        {
+            mat.color = targetColor;
+        }
     }
 
 
