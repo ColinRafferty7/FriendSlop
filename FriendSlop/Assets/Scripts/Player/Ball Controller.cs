@@ -41,6 +41,9 @@ public class BallController : NetworkBehaviour
     Collider lastGroundCollider;
     SurfaceData currentSurfaceData;
 
+
+    bool frameHasFloorContact = false;
+
     [SerializeField]
     [Tooltip("Maps PhysicsMaterial assets to SurfaceData for floors that don't have a SurfaceIdentifier component.")]
     SurfaceMaterialRegistry surfaceRegistry;
@@ -258,9 +261,10 @@ public class BallController : NetworkBehaviour
             }
         }
 
+
         if (floorContactCount == 0) return;
 
-        groundContacts = true;
+        frameHasFloorContact = true;
 
 
         if (collision.collider != lastGroundCollider)
@@ -290,21 +294,11 @@ public class BallController : NetworkBehaviour
     }
     void OnCollisionExit(Collision collision)
     {
+
         if (collision.collider == lastGroundCollider)
         {
             lastGroundCollider = null;
             currentSurfaceData = null;
-
-            groundContacts = false;
-            rb.angularDamping = airAngularDrag;
-            rb.linearDamping = defaultLinearFriction;
-            currentJumpMultiplier = defaultJumpMultiplier;
-            currentForceMultiplier = defaultForceMultiplier;
-            currentAngularFriction = defaultAngularFriction;
-            currentLinearFriction = defaultLinearFriction;
-            currentTorqueMultiplier = defaultTorqueMultiplier;
-            currentIsSlipping = false;
-            currentIsSticky = false;
         }
     }
     void ApplySurfaceValues(SurfaceData data)
@@ -373,6 +367,19 @@ public class BallController : NetworkBehaviour
     }
     void FixedUpdate()
     {
+        if (frameHasFloorContact)
+        {
+            groundContacts = true;
+        }
+        else if (groundContacts)
+        {
+            groundContacts = false;
+            lastGroundCollider = null;
+            currentSurfaceData = null;
+            ApplySurfaceValues(null);
+        }
+        frameHasFloorContact = false;
+
         if (!IsOwner) return;
         //Debug.Log(groundContacts);
         //Debug.Log(rb.angularDamping);
