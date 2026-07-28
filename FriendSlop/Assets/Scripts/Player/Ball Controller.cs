@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using System.Xml.Serialization;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 
 
@@ -78,6 +79,10 @@ public class BallController : NetworkBehaviour
     bool activatePressed = false;
     int swapPressed = 0;
     Vector3 baseScale;
+
+    public NetworkVariable<bool> IsAlive = new(true);
+    public NetworkVariable<int> Score = new(0);
+    [SerializeField] private MeshRenderer mesh;
 
     [System.Serializable]
     public class ActiveBoost
@@ -335,21 +340,51 @@ public class BallController : NetworkBehaviour
         currentIsSticky = false;
     }
 
+    public void ResetForRoundStart()
+    {
+        // Logic for resetting player state at start of round
+    }
+
+    public void Disable()
+    {
+        mesh.enabled = false;
+        enabled = false;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnRpc(Vector3 spawnPoint)
+    {
+        transform.position = spawnPoint;
+    }
     
     private void Awake()
     {
         // Disables player control until the ball has been movedto spawn position
         // Otherwise player position desyncs
+        SceneManager.sceneLoaded += OnSceneLoaded;
         enabled = false;
     }
     
     // Switched Start to OnEnable since it won't trigger while the script is disabled
     void OnEnable()
     {
+        if (RoundManager.Instance != null) RoundManager.Instance.AddPlayer(this);
+        mesh.enabled = true;
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
         RecalculateStats();
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (!IsServer) return;
+
+        if (scene.name.Contains("Map"))
+        {
+            RoundManager.Instance.AddPlayer(this);
+        }
+    }
+
     void Update()
     {
         if (!IsOwner) return;
@@ -375,11 +410,6 @@ public class BallController : NetworkBehaviour
         if (transform.position.y < -10f)
         {
             RespawnRpc();
-        }
-
-        if (Input.GetKeyDown("l"))
-        {
-            Debug.Log(rb.linearVelocity.y);
         }
     }
 

@@ -14,15 +14,16 @@ public class PlayerSpawner : NetworkBehaviour
             enabled = false;
             return;
         }
-        SpawnPlayer();
+        //SpawnPlayer();
         EnablePlayerControllerRpc();
+        //RoundManager.Instance.AddPlayer();
         base.OnNetworkSpawn();
     }    
 
-    private void SpawnPlayer()
+    private void SpawnPlayer(Vector3 spawn)
     {
         if (SpawnPoints == null) return;
-        Vector3 spawn = SpawnPoints.GetRandomSpawnPoint();
+        //Vector3 spawn = SpawnPoints.GetRandomSpawnPoint();
         transform.position = spawn;
     }
 
@@ -32,5 +33,11 @@ public class PlayerSpawner : NetworkBehaviour
     private void EnablePlayerControllerRpc()
     {
         controller.enabled = true;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ResetPlayerRpc()
+    {
+        controller.ResetForRoundStart();
     }
 }

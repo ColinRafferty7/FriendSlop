@@ -387,6 +387,17 @@ MonoBehaviour:
   defaultLinearFriction: 1
   currentAngularFriction: 1
   currentLinearFriction: 1
+  IsAlive:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 1
+  Score:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  mesh: {fileID: 2558198393808217373}
 --- !u!114 &6794983978138688053
 MonoBehaviour:
   m_ObjectHideFlags: 0
