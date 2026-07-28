@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using System.Xml.Serialization;
 
 
 
@@ -345,7 +346,7 @@ public class BallController : NetworkBehaviour
         deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         if (groundContacts == true && Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
+            ApplyJumpForceRpc();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift)) activatePressed = true;
@@ -362,9 +363,28 @@ public class BallController : NetworkBehaviour
         // Basic Respawn Function
         if (transform.position.y < -10f)
         {
-            transform.position = Vector3.zero;
+            RespawnRpc();
+        }
+
+        if (Input.GetKeyDown("l"))
+        {
+            Debug.Log(rb.linearVelocity.y);
         }
     }
+
+    [Rpc(SendTo.Server)]
+    private void RespawnRpc()
+    {
+        transform.position = Vector3.zero;
+    }
+
+
+    [Rpc(SendTo.Server)]
+    private void ApplyJumpForceRpc()
+    {
+        rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
+    }
+
     void FixedUpdate()
     {
         if (frameHasFloorContact)
@@ -381,21 +401,14 @@ public class BallController : NetworkBehaviour
         frameHasFloorContact = false;
 
         if (!IsOwner) return;
-        //Debug.Log(groundContacts);
-        //Debug.Log(rb.angularDamping);
-        //Debug.Log(rb.linearDamping);
-        //Debug.Log(currentJumpMultiplier);
-        //Debug.Log(currentForceMultiplier);
-        //Debug.Log(currentTorqueMultiplier);
         if (isPlayer)
         {
             Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         }
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
         deltaDir.Normalize();
-        float verticalVelocity = rb.linearVelocity.y;
 
-        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir, currentSurfaceNormal);
+        PhysicsCalculationsRpc(torqueAxis, deltaDir, currentSurfaceNormal);
 
         if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
 
@@ -418,7 +431,7 @@ public class BallController : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta, Vector3 surfaceNormal)
+    private void PhysicsCalculationsRpc(Vector3 torqueAxis, Vector3 delta, Vector3 surfaceNormal)
     {
         TickBoosts(Time.fixedDeltaTime);
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
@@ -443,7 +456,6 @@ public class BallController : NetworkBehaviour
         }
         if (groundContacts == true)
         {
-            Debug.Log(speed);
             rb.AddForce(delta * currentForceMultiplier * speed);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
 
@@ -462,7 +474,7 @@ public class BallController : NetworkBehaviour
         {
             horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
         }
-        verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
+        float verticalVelocity = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalSpeed, maxVerticalSpeed);
         rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
         if (rb.angularVelocity.magnitude > maxAngularVelocity)
         {
