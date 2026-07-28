@@ -129,8 +129,8 @@ GameObject:
   - component: {fileID: 5115585262971362756}
   - component: {fileID: -4645308801868793636}
   - component: {fileID: -6382130528330964693}
-  - component: {fileID: 9199071303485360575}
   - component: {fileID: 6794983978138688053}
+  - component: {fileID: 5846716954590659803}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -387,20 +387,6 @@ MonoBehaviour:
   defaultLinearFriction: 1
   currentAngularFriction: 1
   currentLinearFriction: 1
---- !u!114 &9199071303485360575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f17e0b1ae8d7b6c429e3a5ca288cc331, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InputControl
-  ShowTopMostFoldoutHeaderGroup: 1
-  rb: {fileID: 4579209932181427402}
 --- !u!114 &6794983978138688053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,3 +406,18 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: -1
+--- !u!114 &5846716954590659803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a698d0c6b2bec84e844518ec5ae71ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
+  ShowTopMostFoldoutHeaderGroup: 1
+  SpawnPoints: {fileID: 11400000, guid: 8b079d0f92e13694099c55b2e9208e28, type: 2}
+  controller: {fileID: -6382130528330964693}

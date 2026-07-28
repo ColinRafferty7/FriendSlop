@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using System.Xml.Serialization;
+using Unity.VisualScripting;
 
 
 
@@ -333,7 +334,17 @@ public class BallController : NetworkBehaviour
         currentIsSlipping = false;
         currentIsSticky = false;
     }
-    void Start()
+
+    
+    private void Awake()
+    {
+        // Disables player control until the ball has been movedto spawn position
+        // Otherwise player position desyncs
+        enabled = false;
+    }
+    
+    // Switched Start to OnEnable since it won't trigger while the script is disabled
+    void OnEnable()
     {
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
