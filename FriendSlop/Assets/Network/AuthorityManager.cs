@@ -6,9 +6,6 @@ public class AuthorityManager : NetworkBehaviour
 {
     void Awake()
     {
-        if (!IsServer)
-        {
-            gameObject.SetActive(false);
-        }
+
     }
 }

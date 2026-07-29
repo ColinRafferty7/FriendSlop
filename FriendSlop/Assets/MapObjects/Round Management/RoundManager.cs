@@ -8,6 +8,15 @@ public class RoundManager : NetworkBehaviour
     public static RoundManager Instance { get; private set; }
     private List<BallController> Players = new List<BallController>();
     [SerializeField] SpawnData spawns;
+    public NetworkVariable<RoundState> CurrentState;
+
+    public enum RoundState
+    {
+        Waiting,
+        Countdown,
+        Playing,
+        RoundOver,
+    }
 
     private void Awake()
     {
@@ -24,17 +33,16 @@ public class RoundManager : NetworkBehaviour
     {
         if (Players.Contains(player)) return;
         Players.Add(player);
-        player.Disable();
+        player.Eliminate();
         Debug.Log("Player Spawn: " + player.OwnerClientId);
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    public void RoundStartRpc()
+    public void RoundStart()
     {
+        CurrentState.Value = RoundState.Playing;
         foreach (BallController player in Players)
         {
-            player.enabled = true;
-            player.SpawnRpc(spawns.GetRandomSpawnPoint());
+            player.ResetForRound(spawns.GetRandomSpawnPoint());
         }
     }
 }

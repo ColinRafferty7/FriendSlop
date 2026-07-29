@@ -340,21 +340,34 @@ public class BallController : NetworkBehaviour
         currentIsSticky = false;
     }
 
-    public void ResetForRoundStart()
+    public void Eliminate()
     {
-        // Logic for resetting player state at start of round
+        IsAlive.Value = false;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 
-    public void Disable()
-    {
-        mesh.enabled = false;
-        enabled = false;
-    }
-
-    [Rpc(SendTo.Server)]
-    public void SpawnRpc(Vector3 spawnPoint)
+    public void ResetForRound(Vector3 spawnPoint)
     {
         transform.position = spawnPoint;
+        
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;  
+        
+        IsAlive.Value = true;
+    }
+
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            IsAlive.Value = false;
+        }
+
+        OnAliveChanged(false, IsAlive.Value);
+        base.OnNetworkSpawn();
     }
     
     private void Awake()
@@ -362,14 +375,20 @@ public class BallController : NetworkBehaviour
         // Disables player control until the ball has been movedto spawn position
         // Otherwise player position desyncs
         SceneManager.sceneLoaded += OnSceneLoaded;
-        enabled = false;
+        IsAlive.OnValueChanged += OnAliveChanged;
+        IsAlive.Value = false;
     }
     
-    // Switched Start to OnEnable since it won't trigger while the script is disabled
-    void OnEnable()
+    private void OnAliveChanged(bool prev,  bool current)
+    {
+        mesh.enabled = current;
+        col.enabled = current;
+        frontIndicator.gameObject.SetActive(current);
+    }
+
+    void Start()
     {
         if (RoundManager.Instance != null) RoundManager.Instance.AddPlayer(this);
-        mesh.enabled = true;
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
         RecalculateStats();
@@ -389,6 +408,7 @@ public class BallController : NetworkBehaviour
     {
         if (!IsOwner) return;
         if (!isPlayer) return;
+        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing || !IsAlive.Value) return;
         deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         if (groundContacts == true && Input.GetKeyDown(KeyCode.Space))
         {
@@ -409,14 +429,8 @@ public class BallController : NetworkBehaviour
         // Basic Respawn Function
         if (transform.position.y < -10f)
         {
-            RespawnRpc();
+            Eliminate();
         }
-    }
-
-    [Rpc(SendTo.Server)]
-    private void RespawnRpc()
-    {
-        transform.position = Vector3.zero;
     }
 
 
@@ -428,6 +442,8 @@ public class BallController : NetworkBehaviour
 
     void FixedUpdate()
     {
+        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing || !IsAlive.Value) return;
+
         if (frameHasFloorContact)
         {
             groundContacts = true;
