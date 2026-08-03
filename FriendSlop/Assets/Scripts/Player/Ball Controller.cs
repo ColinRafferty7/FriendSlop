@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.Netcode;
 
 
-
 public enum StatType { Speed, JumpForce, Size }
 
 [System.Serializable]
@@ -36,6 +35,11 @@ public class BallController : NetworkBehaviour
     [SerializeField] float indicatorSmoothSpeed = 8f;
     public Vector3 Front { get; private set; } = Vector3.forward;
     Vector3 lastInputDir = Vector3.forward;
+    Vector3 currentPlatformVelocity = Vector3.zero;
+
+    [SerializeField]
+    [Tooltip("How quickly the ball's velocity converges to match a moving platform, in units/sec^2. Higher = snaps to platform speed faster; lower = more gradual catch-up.")]
+    float platformCatchUpAcceleration = 50f;
 
 
     Collider lastGroundCollider;
@@ -130,11 +134,11 @@ public class BallController : NetworkBehaviour
         speed = baseSpeed * speedMult;
         jumpForce = baseJumpForce * jumpMult;
         maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
-        Debug.Log(speed);
         transform.localScale = baseScale * sizeMult;
         rb.mass = baseMass * sizeMult;
         RecalculateRadius();
     }
+
     void TickBoosts(float deltaTime)
     {
         bool anyExpired = false;
@@ -142,6 +146,7 @@ public class BallController : NetworkBehaviour
         for (int i = activeBoosts.Count - 1; i >= 0; i--)
         {
             activeBoosts[i].remainingTime -= deltaTime;
+
             if (activeBoosts[i].remainingTime <= 0f)
             {
                 activeBoosts.RemoveAt(i);
@@ -149,7 +154,8 @@ public class BallController : NetworkBehaviour
             }
         }
 
-        if (anyExpired) RecalculateStats();
+        if (anyExpired)
+            RecalculateStats();
     }
 
 
@@ -177,6 +183,7 @@ public class BallController : NetworkBehaviour
             if (dot > 0f)
             {
                 float dist = toTarget.magnitude;
+
                 if (dist < closestDist)
                 {
                     closestDist = dist;
@@ -184,16 +191,21 @@ public class BallController : NetworkBehaviour
                 }
             }
         }
+
         return closest;
     }
+
+
     public void RecalculateRadius()
     {
         ballRadius = col.radius * transform.lossyScale.x;
+
         if (!currentIsSlipping)
         {
             maxAngularVelocity = maxHorizontalSpeed / ballRadius;
         }
     }
+
 
     public void CollectAbility(AbilityBase prefab)
     {
@@ -203,7 +215,7 @@ public class BallController : NetworkBehaviour
 
             if (indexToRemove < 0 || indexToRemove >= ownedAbilities.Count)
             {
-                indexToRemove = 0; 
+                indexToRemove = 0;
             }
 
             AbilityBase removed = ownedAbilities[indexToRemove];
@@ -225,6 +237,8 @@ public class BallController : NetworkBehaviour
 
         EquipByIndex(ownedAbilities.Count - 1);
     }
+
+
     public void SwapAbility(int direction)
     {
         if (ownedAbilities.Count == 0) return;
@@ -232,6 +246,8 @@ public class BallController : NetworkBehaviour
         int newIndex = (currentAbilityIndex + direction + ownedAbilities.Count) % ownedAbilities.Count;
         EquipByIndex(newIndex);
     }
+
+
     void EquipByIndex(int index)
     {
         if (currentAbility != null)
@@ -245,15 +261,22 @@ public class BallController : NetworkBehaviour
         Debug.Log("Equipped: " + currentAbility.GetType().Name);
     }
 
+
+    public void SetPlatformVelocity(Vector3 velocity)
+    {
+        currentPlatformVelocity = velocity;
+    }
+
+
     void OnCollisionStay(Collision collision)
     {
-
         Vector3 floorNormalSum = Vector3.zero;
         int floorContactCount = 0;
 
         foreach (var contact in collision.contacts)
         {
             float angleFromUp = Vector3.Angle(contact.normal, Vector3.up);
+
             if (angleFromUp <= maxSurfaceAngle)
             {
                 floorNormalSum += contact.normal;
@@ -273,11 +296,11 @@ public class BallController : NetworkBehaviour
 
 
             SurfaceIdentifier identifier = collision.collider.GetComponent<SurfaceIdentifier>();
+
             if (identifier != null)
             {
                 currentSurfaceData = identifier.surfaceData;
             }
-
             else if (surfaceRegistry != null)
             {
                 currentSurfaceData = surfaceRegistry.GetSurfaceData(collision.collider.sharedMaterial);
@@ -288,19 +311,23 @@ public class BallController : NetworkBehaviour
             }
         }
 
+
         ApplySurfaceValues(currentSurfaceData);
 
         currentSurfaceNormal = (floorNormalSum / floorContactCount).normalized;
     }
+
+
     void OnCollisionExit(Collision collision)
     {
-
         if (collision.collider == lastGroundCollider)
         {
             lastGroundCollider = null;
             currentSurfaceData = null;
         }
     }
+
+
     void ApplySurfaceValues(SurfaceData data)
     {
         if (data != null)
@@ -332,39 +359,78 @@ public class BallController : NetworkBehaviour
         currentIsSlipping = false;
         currentIsSticky = false;
     }
+
+
     void Start()
     {
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
         RecalculateStats();
     }
+
+
     void Update()
     {
         if (!IsOwner) return;
         if (!isPlayer) return;
-        deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+
+
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+
+        deltaDir = GetCameraRelativeInputDirection(h, v);
+
+
         if (groundContacts == true && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift)) activatePressed = true;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            activatePressed = true;
+
         if (Input.GetKeyDown(KeyCode.Q))
             swapPressed = -1;
         else if (Input.GetKeyDown(KeyCode.E))
             swapPressed = 1;
+
 
         if (deltaDir.magnitude > 0.01f)
         {
             lastInputDir = deltaDir.normalized;
         }
 
-        // Basic Respawn Function
+
         if (transform.position.y < -10f)
         {
             transform.position = Vector3.zero;
         }
     }
+
+
+    Vector3 GetCameraRelativeInputDirection(float horizontal, float vertical)
+    {
+        Transform camTransform = DynamicCameraController.Instance != null
+            ? DynamicCameraController.Instance.transform
+            : null;
+
+
+        Vector3 camForward = camTransform != null ? camTransform.forward : Vector3.forward;
+        Vector3 camRight = camTransform != null ? camTransform.right : Vector3.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+
+        if (camForward.sqrMagnitude > 0.0001f) camForward.Normalize();
+        if (camRight.sqrMagnitude > 0.0001f) camRight.Normalize();
+
+
+        return camRight * horizontal + camForward * vertical;
+    }
+
+
     void FixedUpdate()
     {
         if (frameHasFloorContact)
@@ -378,57 +444,80 @@ public class BallController : NetworkBehaviour
             currentSurfaceData = null;
             ApplySurfaceValues(null);
         }
+
         frameHasFloorContact = false;
 
+
         if (!IsOwner) return;
-        //Debug.Log(groundContacts);
-        //Debug.Log(rb.angularDamping);
-        //Debug.Log(rb.linearDamping);
-        //Debug.Log(currentJumpMultiplier);
-        //Debug.Log(currentForceMultiplier);
-        //Debug.Log(currentTorqueMultiplier);
-        if (isPlayer)
-        {
-            Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        }
+
+
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
+
         deltaDir.Normalize();
+
         float verticalVelocity = rb.linearVelocity.y;
+
 
         PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir, currentSurfaceNormal);
 
-        if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
 
-        if (cooldownTimer > 0) cooldownTimer -= Time.fixedDeltaTime;
+        if (swapPressed != 0)
+        {
+            SwapAbility(swapPressed);
+            swapPressed = 0;
+        }
 
-        if (currentAbility != null &&
-            (currentAbility.Type == AbilityType.Passive || currentAbility.Type == AbilityType.ActiveAndPassive))
+
+        if (cooldownTimer > 0)
+            cooldownTimer -= Time.fixedDeltaTime;
+
+
+        if (currentAbility != null && (currentAbility.Type == AbilityType.Passive || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
             currentAbility.PassiveTick(gameObject);
         }
 
-        if (activatePressed && currentAbility != null && cooldownTimer <= 0 &&
-            (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
+
+        if (activatePressed && currentAbility != null && cooldownTimer <= 0 && (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
             currentAbility.Activate(gameObject);
             cooldownTimer = currentAbility.Cooldown;
         }
 
+
         activatePressed = false;
     }
+
 
     [Rpc(SendTo.Server)]
     private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta, Vector3 surfaceNormal)
     {
         TickBoosts(Time.fixedDeltaTime);
-        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        float angularSpeed = 0f;
-        if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)
+
+        Vector3 currentVelocity = rb.linearVelocity;
+
+        Vector3 worldVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
+        // rb.linearVelocity is now ALWAYS the ball's own velocity only - platform
+        // motion is applied separately via the direct rb.position offset below, and
+        // never mixes into linearVelocity at all (friction is ~0 specifically to
+        // ensure this). So no subtraction is needed or correct here anymore - doing
+        // so would fabricate a large fake "relative velocity" any time the platform
+        // is moving, even with zero real slip, which is what caused the wrong
+        // rotation and runaway drift.
+        Vector3 relativeVelocity = worldVelocity;
+
+
+
+        if (!currentIsSlipping && relativeVelocity.magnitude > 0.01f)
         {
-            angularSpeed = horizontalVelocity.magnitude / ballRadius;
-            Vector3 rotationAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
+            float angularSpeed = relativeVelocity.magnitude / ballRadius;
+
+            Vector3 rotationAxis = Vector3.Cross(Vector3.up, relativeVelocity.normalized);
+
             rb.angularVelocity = rotationAxis * angularSpeed;
         }
+
         if (currentIsSticky)
         {
             Vector3 gravityForce = Physics.gravity * rb.mass;
@@ -441,34 +530,52 @@ public class BallController : NetworkBehaviour
                 rb.AddForce(-slideComponent);
             }
         }
-        if (groundContacts == true)
-        {
-            Debug.Log(speed);
-            rb.AddForce(delta * currentForceMultiplier * speed);
-            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
 
-            if (rb.angularVelocity != null && currentIsSlipping)
-            {
-                rb.AddTorque((-rb.angularVelocity).normalized * currentAngularFriction);
-            }
+        if (groundContacts)
+        {
+            rb.AddForce(delta * currentForceMultiplier * speed, ForceMode.Force);
+            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
         }
         else
         {
-            rb.AddForce(delta * currentForceMultiplier * speed * airControl);
+            rb.AddForce(delta * currentForceMultiplier * speed * airControl, ForceMode.Force);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier * airControl * 0.5f, ForceMode.Force);
         }
-        horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        currentVelocity = rb.linearVelocity;
+
+        Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
         if (horizontalVelocity.magnitude > maxHorizontalSpeed)
         {
             horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
         }
+
         verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
-        rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
+
+        // Converges toward (own velocity + platform velocity) at a bounded rate,
+        // rather than setting velocity/position outright every step - per Unity's
+        // own guidance, directly setting velocity or position every physics step
+        // causes unrealistic/unstable simulation (that's exactly what caused the
+        // runaway acceleration with the direct position offset). MoveTowards can
+        // only ever move PART of the way to the target each step, so it cannot
+        // overshoot, and does nothing extra once the ball is already matching -
+        // no compounding is possible either way.
+        Vector3 targetHorizontal = horizontalVelocity + currentPlatformVelocity;
+        Vector3 actualHorizontal = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        Vector3 newHorizontal = Vector3.MoveTowards(
+            actualHorizontal,
+            targetHorizontal,
+            platformCatchUpAcceleration * Time.fixedDeltaTime);
+
+        rb.linearVelocity = new Vector3(newHorizontal.x, verticalVelocity, newHorizontal.z);
+
         if (rb.angularVelocity.magnitude > maxAngularVelocity)
         {
             rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
         }
     }
+
 
     private void LateUpdate()
     {
@@ -476,10 +583,14 @@ public class BallController : NetworkBehaviour
         {
             Front = Vector3.Slerp(Front, lastInputDir, indicatorSmoothSpeed * Time.deltaTime);
 
+
             Vector3 targetPos = transform.position + Front * (ballRadius * indicatorOffsetMultiplier);
+
             Quaternion targetRot = Quaternion.LookRotation(Front, Vector3.up);
 
+
             frontIndicator.position = targetPos;
+
             frontIndicator.rotation = targetRot;
         }
     }
