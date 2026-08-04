@@ -64,6 +64,7 @@ public class MainMenu : MonoBehaviour
     {
         Debug.Log(enteredCode.text);
         bool join = await StartClientWithRelay(enteredCode.text);
+        if (join) Debug.Log("Joined");
     }
 
     public async Task<bool> StartClientWithRelay(string joinCode)
@@ -86,5 +87,22 @@ public class MainMenu : MonoBehaviour
         );
 
         return NetworkManager.Singleton.StartClient();
+    }
+
+    private void Awake()
+    {
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        Debug.Log($"Connected: {clientId}");
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        Debug.Log($"Disconnected: {clientId}");
+        Debug.Log($"Reason: {NetworkManager.Singleton.DisconnectReason}");
     }
 }

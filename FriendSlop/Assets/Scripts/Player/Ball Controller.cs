@@ -563,7 +563,7 @@ public class BallController : NetworkBehaviour
         float verticalVelocity = rb.linearVelocity.y;
 
 
-        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir, currentSurfaceNormal);
+        PhysicsCalculationsRpc(torqueAxis, deltaDir, currentSurfaceNormal);
 
 
         if (swapPressed != 0)
@@ -670,8 +670,7 @@ public class BallController : NetworkBehaviour
 
         horizontalVelocity = ownHorizontalVelocity + trackedPlatformVelocity;
 
-        verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
-
+        float verticalVelocity = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalSpeed, maxVerticalSpeed);
         rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
 
         if (rb.angularVelocity.magnitude > maxAngularVelocity)

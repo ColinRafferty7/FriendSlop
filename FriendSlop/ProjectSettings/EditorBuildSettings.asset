@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Temp Lobby.unity
     guid: 5c076c8fd5fa1b64ba6fdc02bfe7e946
-  - enable: 1
+  - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: 5e5c19af60a48324da034a64fdbd38c7
   m_configObjects: {}
