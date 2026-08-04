@@ -7,7 +7,6 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
-
 public enum StatType { Speed, JumpForce, Size }
 
 [System.Serializable]
@@ -40,9 +39,18 @@ public class BallController : NetworkBehaviour
     public Vector3 Front { get; private set; } = Vector3.forward;
     Vector3 lastInputDir = Vector3.forward;
 
+    Vector3 currentPlatformVelocity = Vector3.zero;
+
+    Vector3 trackedPlatformVelocity = Vector3.zero;
+    [SerializeField]
+    float platformCatchUpRate = 40f;
+
+    bool wasOnPlatformLastFrame = false;
+
 
     Collider lastGroundCollider;
     SurfaceData currentSurfaceData;
+    public bool IsOnPlatform { get; private set; } = false;
 
 
     bool frameHasFloorContact = false;
@@ -137,11 +145,11 @@ public class BallController : NetworkBehaviour
         speed = baseSpeed * speedMult;
         jumpForce = baseJumpForce * jumpMult;
         maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
-        Debug.Log(speed);
         transform.localScale = baseScale * sizeMult;
         rb.mass = baseMass * sizeMult;
         RecalculateRadius();
     }
+
     void TickBoosts(float deltaTime)
     {
         bool anyExpired = false;
@@ -149,6 +157,7 @@ public class BallController : NetworkBehaviour
         for (int i = activeBoosts.Count - 1; i >= 0; i--)
         {
             activeBoosts[i].remainingTime -= deltaTime;
+
             if (activeBoosts[i].remainingTime <= 0f)
             {
                 activeBoosts.RemoveAt(i);
@@ -156,7 +165,8 @@ public class BallController : NetworkBehaviour
             }
         }
 
-        if (anyExpired) RecalculateStats();
+        if (anyExpired)
+            RecalculateStats();
     }
 
 
@@ -184,6 +194,7 @@ public class BallController : NetworkBehaviour
             if (dot > 0f)
             {
                 float dist = toTarget.magnitude;
+
                 if (dist < closestDist)
                 {
                     closestDist = dist;
@@ -191,16 +202,21 @@ public class BallController : NetworkBehaviour
                 }
             }
         }
+
         return closest;
     }
+
+
     public void RecalculateRadius()
     {
         ballRadius = col.radius * transform.lossyScale.x;
+
         if (!currentIsSlipping)
         {
             maxAngularVelocity = maxHorizontalSpeed / ballRadius;
         }
     }
+
 
     public void CollectAbility(AbilityBase prefab)
     {
@@ -210,7 +226,7 @@ public class BallController : NetworkBehaviour
 
             if (indexToRemove < 0 || indexToRemove >= ownedAbilities.Count)
             {
-                indexToRemove = 0; 
+                indexToRemove = 0;
             }
 
             AbilityBase removed = ownedAbilities[indexToRemove];
@@ -232,6 +248,8 @@ public class BallController : NetworkBehaviour
 
         EquipByIndex(ownedAbilities.Count - 1);
     }
+
+
     public void SwapAbility(int direction)
     {
         if (ownedAbilities.Count == 0) return;
@@ -239,6 +257,8 @@ public class BallController : NetworkBehaviour
         int newIndex = (currentAbilityIndex + direction + ownedAbilities.Count) % ownedAbilities.Count;
         EquipByIndex(newIndex);
     }
+
+
     void EquipByIndex(int index)
     {
         if (currentAbility != null)
@@ -252,6 +272,16 @@ public class BallController : NetworkBehaviour
         Debug.Log("Equipped: " + currentAbility.GetType().Name);
     }
 
+    public void SetPlatformVelocity(Vector3 velocity)
+    {
+        currentPlatformVelocity = velocity;
+    }
+    public void SetOnPlatform(bool onPlatform)
+    {
+        IsOnPlatform = onPlatform;
+    }
+
+
     void OnCollisionStay(Collision collision)
     {
         Vector3 floorNormalSum = Vector3.zero;
@@ -260,6 +290,7 @@ public class BallController : NetworkBehaviour
         foreach (var contact in collision.contacts)
         {
             float angleFromUp = Vector3.Angle(contact.normal, Vector3.up);
+
             if (angleFromUp <= maxSurfaceAngle)
             {
                 floorNormalSum += contact.normal;
@@ -279,11 +310,11 @@ public class BallController : NetworkBehaviour
 
 
             SurfaceIdentifier identifier = collision.collider.GetComponent<SurfaceIdentifier>();
+
             if (identifier != null)
             {
                 currentSurfaceData = identifier.surfaceData;
             }
-
             else if (surfaceRegistry != null)
             {
                 currentSurfaceData = surfaceRegistry.GetSurfaceData(collision.collider.sharedMaterial);
@@ -294,19 +325,23 @@ public class BallController : NetworkBehaviour
             }
         }
 
+
         ApplySurfaceValues(currentSurfaceData);
 
         currentSurfaceNormal = (floorNormalSum / floorContactCount).normalized;
     }
+
+
     void OnCollisionExit(Collision collision)
     {
-
         if (collision.collider == lastGroundCollider)
         {
             lastGroundCollider = null;
             currentSurfaceData = null;
         }
     }
+
+
     void ApplySurfaceValues(SurfaceData data)
     {
         if (data != null)
@@ -439,23 +474,34 @@ public class BallController : NetworkBehaviour
         if (!isPlayer) return;
         if (!IsAlive.Value) return;
         if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing) return;
-        deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+
+        deltaDir = GetCameraRelativeInputDirection(h, v);
+
         if (groundContacts.Value == true && Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("Jump");
             ApplyJumpForceRpc();
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift)) activatePressed = true;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            activatePressed = true;
+
         if (Input.GetKeyDown(KeyCode.Q))
             swapPressed = -1;
         else if (Input.GetKeyDown(KeyCode.E))
             swapPressed = 1;
 
+
         if (deltaDir.magnitude > 0.01f)
         {
             lastInputDir = deltaDir.normalized;
         }
+
+        
     }
 
 
@@ -464,6 +510,28 @@ public class BallController : NetworkBehaviour
     {
         rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
     }
+
+    private Vector3 GetCameraRelativeInputDirection(float horizontal, float vertical)
+    {
+        Transform camTransform = DynamicCameraController.Instance != null
+            ? DynamicCameraController.Instance.transform
+            : null;
+
+
+        Vector3 camForward = camTransform != null ? camTransform.forward : Vector3.forward;
+        Vector3 camRight = camTransform != null ? camTransform.right : Vector3.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+
+        if (camForward.sqrMagnitude > 0.0001f) camForward.Normalize();
+        if (camRight.sqrMagnitude > 0.0001f) camRight.Normalize();
+
+
+        return camRight * horizontal + camForward * vertical;
+    }
+
 
     void FixedUpdate()
     {
@@ -481,50 +549,72 @@ public class BallController : NetworkBehaviour
             currentSurfaceData = null;
             ApplySurfaceValues(null);
         }
+
         frameHasFloorContact = false;
 
+
         if (!IsOwner) return;
-        if (isPlayer)
-        {
-            Vector3 deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        }
+
+
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
+
         deltaDir.Normalize();
 
-        PhysicsCalculationsRpc(torqueAxis, deltaDir, currentSurfaceNormal);
+        float verticalVelocity = rb.linearVelocity.y;
 
-        if (swapPressed != 0) { SwapAbility(swapPressed); swapPressed = 0; }
 
-        if (cooldownTimer > 0) cooldownTimer -= Time.fixedDeltaTime;
+        PhysicsCalculationsRpc(torqueAxis, verticalVelocity, deltaDir, currentSurfaceNormal);
 
-        if (currentAbility != null &&
-            (currentAbility.Type == AbilityType.Passive || currentAbility.Type == AbilityType.ActiveAndPassive))
+
+        if (swapPressed != 0)
+        {
+            SwapAbility(swapPressed);
+            swapPressed = 0;
+        }
+
+
+        if (cooldownTimer > 0)
+            cooldownTimer -= Time.fixedDeltaTime;
+
+
+        if (currentAbility != null && (currentAbility.Type == AbilityType.Passive || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
             currentAbility.PassiveTick(gameObject);
         }
 
-        if (activatePressed && currentAbility != null && cooldownTimer <= 0 &&
-            (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
+
+        if (activatePressed && currentAbility != null && cooldownTimer <= 0 && (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
             currentAbility.Activate(gameObject);
             cooldownTimer = currentAbility.Cooldown;
         }
 
+
         activatePressed = false;
     }
+
 
     [Rpc(SendTo.Server)]
     private void PhysicsCalculationsRpc(Vector3 torqueAxis, Vector3 delta, Vector3 surfaceNormal)
     {
         TickBoosts(Time.fixedDeltaTime);
-        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        float angularSpeed = 0f;
-        if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)
+
+        Vector3 currentVelocity = rb.linearVelocity;
+
+        Vector3 worldVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
+        Vector3 relativeVelocity = worldVelocity - trackedPlatformVelocity;
+
+
+        if (!currentIsSlipping && relativeVelocity.magnitude > 0.01f)
         {
-            angularSpeed = horizontalVelocity.magnitude / ballRadius;
-            Vector3 rotationAxis = Vector3.Cross(Vector3.up, horizontalVelocity.normalized);
+            float angularSpeed = relativeVelocity.magnitude / ballRadius;
+
+            Vector3 rotationAxis = Vector3.Cross(Vector3.up, relativeVelocity.normalized);
+
             rb.angularVelocity = rotationAxis * angularSpeed;
         }
+
         if (currentIsSticky)
         {
             Vector3 gravityForce = Physics.gravity * rb.mass;
@@ -537,33 +627,61 @@ public class BallController : NetworkBehaviour
                 rb.AddForce(-slideComponent);
             }
         }
-        if (groundContacts.Value == true)
-        {
-            rb.AddForce(delta * currentForceMultiplier * speed);
-            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
 
-            if (rb.angularVelocity != null && currentIsSlipping)
-            {
-                rb.AddTorque((-rb.angularVelocity).normalized * currentAngularFriction);
-            }
+        if (groundContacts.Value)
+        {
+            rb.AddForce(delta * currentForceMultiplier * speed, ForceMode.Force);
+            rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
         }
         else
         {
-            rb.AddForce(delta * currentForceMultiplier * speed * airControl);
+            rb.AddForce(delta * currentForceMultiplier * speed * airControl, ForceMode.Force);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier * airControl * 0.5f, ForceMode.Force);
         }
-        horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        if (horizontalVelocity.magnitude > maxHorizontalSpeed)
+
+        currentVelocity = rb.linearVelocity;
+
+        Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
+        float dampingFactor = 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
+        trackedPlatformVelocity *= dampingFactor;
+
+        bool justLeftPlatform = wasOnPlatformLastFrame && !IsOnPlatform;
+
+        Vector3 ownHorizontalVelocity;
+
+        if (justLeftPlatform)
         {
-            horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
+            ownHorizontalVelocity = horizontalVelocity;
         }
-        float verticalVelocity = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalSpeed, maxVerticalSpeed);
+        else
+        {
+            ownHorizontalVelocity = horizontalVelocity - trackedPlatformVelocity;
+
+            if (ownHorizontalVelocity.magnitude > maxHorizontalSpeed)
+            {
+                ownHorizontalVelocity = ownHorizontalVelocity.normalized * maxHorizontalSpeed;
+            }
+        }
+
+        Vector3 desiredPlatformVelocity = IsOnPlatform ? currentPlatformVelocity : Vector3.zero;
+
+        trackedPlatformVelocity = Vector3.MoveTowards(trackedPlatformVelocity, desiredPlatformVelocity, platformCatchUpRate * Time.fixedDeltaTime);
+
+        horizontalVelocity = ownHorizontalVelocity + trackedPlatformVelocity;
+
+        verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
+
         rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
+
         if (rb.angularVelocity.magnitude > maxAngularVelocity)
         {
             rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
         }
+
+        wasOnPlatformLastFrame = IsOnPlatform;
     }
+
 
     private void LateUpdate()
     {
@@ -571,10 +689,14 @@ public class BallController : NetworkBehaviour
         {
             Front = Vector3.Slerp(Front, lastInputDir, indicatorSmoothSpeed * Time.deltaTime);
 
+
             Vector3 targetPos = transform.position + Front * (ballRadius * indicatorOffsetMultiplier);
+
             Quaternion targetRot = Quaternion.LookRotation(Front, Vector3.up);
 
+
             frontIndicator.position = targetPos;
+
             frontIndicator.rotation = targetRot;
         }
     }

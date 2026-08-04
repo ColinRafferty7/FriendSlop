@@ -56,7 +56,7 @@ public class GloveProjectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (retracting) return;
+        //if (retracting) return;
 
         Rigidbody otherRb = other.attachedRigidbody;
         if (otherRb == null || other.gameObject == user || alreadyHit.Contains(otherRb))
