@@ -455,7 +455,7 @@ public class BallController : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        if (scene.name.Contains("Map"))
+        if (RoundManager.Instance != null)
         {
             RoundManager.Instance.AddPlayer(this);
         }

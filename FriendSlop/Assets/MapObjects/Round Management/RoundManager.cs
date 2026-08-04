@@ -16,9 +16,11 @@ public class RoundManager : NetworkBehaviour
     public NetworkVariable<int> Countdown = new();
     public NetworkVariable<bool> UIactive = new();
 
+    public bool IsLobby = false;
+
     [SerializeField] private Text countdownText;
 
-    private float AlivePlayers;
+    public float AlivePlayers;
 
     public enum RoundState
     {
@@ -37,11 +39,22 @@ public class RoundManager : NetworkBehaviour
         }
 
         Instance = this;
+
+        if (spawns == null)
+        {
+            spawns = new SpawnData();
+        }
     }
 
     void Start()
     {
         if (!IsServer) return;
+        if (IsLobby)
+        {
+            SpawnAllPlayers();
+            CurrentState.Value = RoundState.Playing;
+            return;
+        }
         StartCoroutine(RoundStart());
     }
 
@@ -87,7 +100,7 @@ public class RoundManager : NetworkBehaviour
     {
         if (Players.Contains(player)) return;
         Players.Add(player);
-        player.Eliminate();
+        if (!IsLobby) player.Eliminate();
         Debug.Log("Player Spawn: " + player.OwnerClientId);
     }
 
@@ -106,17 +119,29 @@ public class RoundManager : NetworkBehaviour
         DespawnAllPlayers();
 
         yield return StartCoroutine(StartTimer(3));
-        foreach (BallController player in Players)
-        {
-            player.ResetForRound(spawns.GetRandomSpawnPoint());
-            AlivePlayers++;
-        }
+        AlivePlayers += SpawnAllPlayers();
         
         CurrentState.Value = RoundState.Playing;
     }
 
+    private int SpawnAllPlayers()
+    {
+        int count = 0;
+        foreach (BallController player in Players)
+        {
+            player.ResetForRound(spawns.GetRandomSpawnPoint());
+            count++;
+        }
+        return count;
+    }
+
     public void PlayerEliminated(BallController player)
     {
+        if (IsLobby)
+        {
+            player.ResetForRound(spawns.GetRandomSpawnPoint());
+            return;
+        }
         if (CurrentState.Value != RoundState.Playing) return;
         AlivePlayers--;
         if (AlivePlayers <= 1)
