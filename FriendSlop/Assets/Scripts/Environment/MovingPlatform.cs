@@ -91,6 +91,13 @@ public class MovingPlatform : NetworkBehaviour
                 if (Vector3.Dot(contact.normal, Vector3.down) > 0.5f)
                 {
                     riders.Add(rider);
+
+                    BallController newBall = rider.GetComponentInParent<BallController>();
+                    if (newBall != null)
+                    {
+                        newBall.SetOnPlatform(true);
+                    }
+
                     break;
                 }
             }
@@ -110,6 +117,7 @@ public class MovingPlatform : NetworkBehaviour
         if (ball != null)
         {
             ball.SetPlatformVelocity(Vector3.zero);
+            ball.SetOnPlatform(false);
         }
     }
 
@@ -129,14 +137,17 @@ public class MovingPlatform : NetworkBehaviour
         int prevBoundary = Mathf.FloorToInt(t.Value * segmentCount + 0.0001f);
         int newBoundary = Mathf.FloorToInt(advanced * segmentCount);
 
-        if (newBoundary > prevBoundary)
+        // Check EVERY boundary crossed this frame, not just the first - if speed is
+        // high enough relative to waypoint spacing, more than one waypoint can be
+        // passed within a single physics step, and any of them might have a stop
+        // duration that shouldn't get silently skipped.
+        for (int boundary = prevBoundary + 1; boundary <= newBoundary; boundary++)
         {
-            int arrivedBoundary = prevBoundary + 1;
-            float boundaryT = (float)arrivedBoundary / segmentCount;
+            float boundaryT = (float)boundary / segmentCount;
 
             int anchorIndex = wrapMode == MovingPlatformPath.WrapMode.Loop
-                ? arrivedBoundary % anchors.Count
-                : Mathf.Min(arrivedBoundary, anchors.Count - 1);
+                ? boundary % anchors.Count
+                : Mathf.Min(boundary, anchors.Count - 1);
 
             float stopDuration = anchors[anchorIndex].stopDuration;
 
@@ -144,6 +155,7 @@ public class MovingPlatform : NetworkBehaviour
             {
                 advanced = boundaryT;
                 waitTimer = stopDuration;
+                break; // stop at the FIRST qualifying waypoint reached, in order
             }
         }
 

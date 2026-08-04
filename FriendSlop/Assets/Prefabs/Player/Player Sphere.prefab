@@ -491,6 +491,7 @@ MonoBehaviour:
   frontIndicator: {fileID: 5209117732065110345}
   indicatorOffsetMultiplier: 1.5
   indicatorSmoothSpeed: 20
+  platformCatchUpRate: 1000
   surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
   maxSurfaceAngle: 60
   airAngularDrag: 0

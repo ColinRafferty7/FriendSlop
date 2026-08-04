@@ -35,15 +35,19 @@ public class BallController : NetworkBehaviour
     [SerializeField] float indicatorSmoothSpeed = 8f;
     public Vector3 Front { get; private set; } = Vector3.forward;
     Vector3 lastInputDir = Vector3.forward;
+
     Vector3 currentPlatformVelocity = Vector3.zero;
 
+    Vector3 trackedPlatformVelocity = Vector3.zero;
     [SerializeField]
-    [Tooltip("How quickly the ball's velocity converges to match a moving platform, in units/sec^2. Higher = snaps to platform speed faster; lower = more gradual catch-up.")]
-    float platformCatchUpAcceleration = 50f;
+    float platformCatchUpRate = 40f;
+
+    bool wasOnPlatformLastFrame = false;
 
 
     Collider lastGroundCollider;
     SurfaceData currentSurfaceData;
+    public bool IsOnPlatform { get; private set; } = false;
 
 
     bool frameHasFloorContact = false;
@@ -261,10 +265,13 @@ public class BallController : NetworkBehaviour
         Debug.Log("Equipped: " + currentAbility.GetType().Name);
     }
 
-
     public void SetPlatformVelocity(Vector3 velocity)
     {
         currentPlatformVelocity = velocity;
+    }
+    public void SetOnPlatform(bool onPlatform)
+    {
+        IsOnPlatform = onPlatform;
     }
 
 
@@ -498,15 +505,7 @@ public class BallController : NetworkBehaviour
 
         Vector3 worldVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
 
-        // rb.linearVelocity is now ALWAYS the ball's own velocity only - platform
-        // motion is applied separately via the direct rb.position offset below, and
-        // never mixes into linearVelocity at all (friction is ~0 specifically to
-        // ensure this). So no subtraction is needed or correct here anymore - doing
-        // so would fabricate a large fake "relative velocity" any time the platform
-        // is moving, even with zero real slip, which is what caused the wrong
-        // rotation and runaway drift.
-        Vector3 relativeVelocity = worldVelocity;
-
+        Vector3 relativeVelocity = worldVelocity - trackedPlatformVelocity;
 
 
         if (!currentIsSlipping && relativeVelocity.magnitude > 0.01f)
@@ -546,34 +545,43 @@ public class BallController : NetworkBehaviour
 
         Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
 
-        if (horizontalVelocity.magnitude > maxHorizontalSpeed)
+        float dampingFactor = 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
+        trackedPlatformVelocity *= dampingFactor;
+
+        bool justLeftPlatform = wasOnPlatformLastFrame && !IsOnPlatform;
+
+        Vector3 ownHorizontalVelocity;
+
+        if (justLeftPlatform)
         {
-            horizontalVelocity = horizontalVelocity.normalized * maxHorizontalSpeed;
+            ownHorizontalVelocity = horizontalVelocity;
         }
+        else
+        {
+            ownHorizontalVelocity = horizontalVelocity - trackedPlatformVelocity;
+
+            if (ownHorizontalVelocity.magnitude > maxHorizontalSpeed)
+            {
+                ownHorizontalVelocity = ownHorizontalVelocity.normalized * maxHorizontalSpeed;
+            }
+        }
+
+        Vector3 desiredPlatformVelocity = IsOnPlatform ? currentPlatformVelocity : Vector3.zero;
+
+        trackedPlatformVelocity = Vector3.MoveTowards(trackedPlatformVelocity, desiredPlatformVelocity, platformCatchUpRate * Time.fixedDeltaTime);
+
+        horizontalVelocity = ownHorizontalVelocity + trackedPlatformVelocity;
 
         verticalVelocity = Mathf.Clamp(verticalVelocity, -maxVerticalSpeed, maxVerticalSpeed);
 
-        // Converges toward (own velocity + platform velocity) at a bounded rate,
-        // rather than setting velocity/position outright every step - per Unity's
-        // own guidance, directly setting velocity or position every physics step
-        // causes unrealistic/unstable simulation (that's exactly what caused the
-        // runaway acceleration with the direct position offset). MoveTowards can
-        // only ever move PART of the way to the target each step, so it cannot
-        // overshoot, and does nothing extra once the ball is already matching -
-        // no compounding is possible either way.
-        Vector3 targetHorizontal = horizontalVelocity + currentPlatformVelocity;
-        Vector3 actualHorizontal = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        Vector3 newHorizontal = Vector3.MoveTowards(
-            actualHorizontal,
-            targetHorizontal,
-            platformCatchUpAcceleration * Time.fixedDeltaTime);
-
-        rb.linearVelocity = new Vector3(newHorizontal.x, verticalVelocity, newHorizontal.z);
+        rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);
 
         if (rb.angularVelocity.magnitude > maxAngularVelocity)
         {
             rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
         }
+
+        wasOnPlatformLastFrame = IsOnPlatform;
     }
 
 
