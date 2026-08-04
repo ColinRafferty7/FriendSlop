@@ -1,7 +1,11 @@
-using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
-using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class RoundManager : NetworkBehaviour
 {
@@ -9,6 +13,12 @@ public class RoundManager : NetworkBehaviour
     private List<BallController> Players = new List<BallController>();
     [SerializeField] SpawnData spawns;
     public NetworkVariable<RoundState> CurrentState;
+    public NetworkVariable<int> Countdown = new();
+    public NetworkVariable<bool> UIactive = new();
+
+    [SerializeField] private Text countdownText;
+
+    private float AlivePlayers;
 
     public enum RoundState
     {
@@ -29,6 +39,50 @@ public class RoundManager : NetworkBehaviour
         Instance = this;
     }
 
+    void Start()
+    {
+        if (!IsServer) return;
+        StartCoroutine(RoundStart());
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        Countdown.OnValueChanged += OnCountdownChanged;
+        UIactive.OnValueChanged += OnActiveChanged;
+    }
+
+    private void OnActiveChanged(bool previous, bool current)
+    {
+        countdownText.gameObject.SetActive(current);
+    }
+
+    private void OnCountdownChanged(int previous, int current)
+    {
+        UIactive.Value = true;
+
+        if (current > 0)
+            countdownText.text = current.ToString();
+        else
+            countdownText.text = "GO!";
+    }
+
+    private IEnumerator StartTimer(int seconds)
+    {
+        CurrentState.Value = RoundState.Countdown;
+
+        while (seconds > 0)
+        {
+            Countdown.Value = seconds;
+            yield return new WaitForSeconds(1f);
+            seconds--;
+        }
+
+        Countdown.Value = 0;
+        yield return new WaitForSeconds(1f);
+
+        UIactive.Value = false;
+    }
+
     public void AddPlayer(BallController player)
     {
         if (Players.Contains(player)) return;
@@ -37,12 +91,66 @@ public class RoundManager : NetworkBehaviour
         Debug.Log("Player Spawn: " + player.OwnerClientId);
     }
 
-    public void RoundStart()
+    private void DespawnAllPlayers()
     {
-        CurrentState.Value = RoundState.Playing;
+        foreach (BallController player in Players)
+        {
+            player.Eliminate();
+        }
+    }
+
+    public IEnumerator RoundStart()
+    {
+        AlivePlayers = 0;
+
+        DespawnAllPlayers();
+
+        yield return StartCoroutine(StartTimer(3));
         foreach (BallController player in Players)
         {
             player.ResetForRound(spawns.GetRandomSpawnPoint());
+            AlivePlayers++;
         }
+        
+        CurrentState.Value = RoundState.Playing;
+    }
+
+    public void PlayerEliminated(BallController player)
+    {
+        if (CurrentState.Value != RoundState.Playing) return;
+        AlivePlayers--;
+        if (AlivePlayers <= 1)
+        {
+            StartCoroutine(RoundOver());
+        }
+    }
+
+    private IEnumerator RoundOver()
+    {
+        string message;
+
+        CurrentState.Value = RoundState.RoundOver;
+
+        if (AlivePlayers < 1)
+        {
+            message = "No Winner";
+        }
+        else
+        {
+            BallController winner = Players.FirstOrDefault(player => player.IsAlive.Value);
+
+            message = $"Player #{winner.OwnerClientId} Wins!";
+        }
+        UIactive.Value = true;
+        AnnounceWinnerRpc(message);
+        yield return new WaitForSeconds(3f);
+        UIactive.Value = false;
+        StartCoroutine(RoundStart());
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void AnnounceWinnerRpc(string message)
+    {
+        countdownText.text = message;
     }
 }

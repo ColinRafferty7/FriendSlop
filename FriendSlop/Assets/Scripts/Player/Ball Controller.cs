@@ -61,7 +61,7 @@ public class BallController : NetworkBehaviour
     public float defaultTorqueMultiplier = 1f;
     public float defaultAngularFriction = 1f;
     public float defaultLinearFriction = 1f;
-    bool groundContacts = false;
+    public NetworkVariable<bool> groundContacts = new(false);
     float currentJumpMultiplier = 1f;
     float currentForceMultiplier = 1f;
     float currentTorqueMultiplier = 1f;
@@ -254,7 +254,6 @@ public class BallController : NetworkBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-
         Vector3 floorNormalSum = Vector3.zero;
         int floorContactCount = 0;
 
@@ -342,32 +341,54 @@ public class BallController : NetworkBehaviour
 
     public void Eliminate()
     {
+        if (!IsServer)
+            return;
+
         IsAlive.Value = false;
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+
+        RoundManager.Instance.PlayerEliminated(this);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void EliminateRpc()
+    {
+        Eliminate();
     }
 
     public void ResetForRound(Vector3 spawnPoint)
     {
-        transform.position = spawnPoint;
+        if (!IsServer)
+            return;
         
         rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;  
-        
+        rb.angularVelocity = Vector3.zero;
+
+        rb.position = spawnPoint;
+        rb.rotation = Quaternion.identity;
+
         IsAlive.Value = true;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ResetForRoundRpc(Vector3 spawnPoint)
+    {
+        ResetForRound(spawnPoint);
     }
 
 
     public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
         if (IsServer)
         {
             IsAlive.Value = false;
         }
 
         OnAliveChanged(false, IsAlive.Value);
-        base.OnNetworkSpawn();
     }
     
     private void Awake()
@@ -376,11 +397,12 @@ public class BallController : NetworkBehaviour
         // Otherwise player position desyncs
         SceneManager.sceneLoaded += OnSceneLoaded;
         IsAlive.OnValueChanged += OnAliveChanged;
-        IsAlive.Value = false;
     }
     
     private void OnAliveChanged(bool prev,  bool current)
     {
+        Debug.Log($"${OwnerClientId}: IsAlive Changed to - {current}");
+        if (current) Debug.Log($"${OwnerClientId}\nPosition: {rb.position}\nVelocity: {rb.linearVelocity}");
         mesh.enabled = current;
         col.enabled = current;
         frontIndicator.gameObject.SetActive(current);
@@ -406,12 +428,21 @@ public class BallController : NetworkBehaviour
 
     void Update()
     {
+        if (IsServer && rb.position.y < -10f)
+        {
+            Debug.Log("Should be eliminated");
+            Eliminate();
+            return;
+        }
+
         if (!IsOwner) return;
         if (!isPlayer) return;
-        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing || !IsAlive.Value) return;
+        if (!IsAlive.Value) return;
+        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing) return;
         deltaDir = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        if (groundContacts == true && Input.GetKeyDown(KeyCode.Space))
+        if (groundContacts.Value == true && Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("Jump");
             ApplyJumpForceRpc();
         }
 
@@ -425,12 +456,6 @@ public class BallController : NetworkBehaviour
         {
             lastInputDir = deltaDir.normalized;
         }
-
-        // Basic Respawn Function
-        if (transform.position.y < -10f)
-        {
-            Eliminate();
-        }
     }
 
 
@@ -442,15 +467,16 @@ public class BallController : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing || !IsAlive.Value) return;
+        if (!IsAlive.Value) return;
+        if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing) return;
 
         if (frameHasFloorContact)
         {
-            groundContacts = true;
+            groundContacts.Value = true;
         }
-        else if (groundContacts)
+        else if (groundContacts.Value)
         {
-            groundContacts = false;
+            groundContacts.Value = false;
             lastGroundCollider = null;
             currentSurfaceData = null;
             ApplySurfaceValues(null);
@@ -511,7 +537,7 @@ public class BallController : NetworkBehaviour
                 rb.AddForce(-slideComponent);
             }
         }
-        if (groundContacts == true)
+        if (groundContacts.Value == true)
         {
             rb.AddForce(delta * currentForceMultiplier * speed);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
