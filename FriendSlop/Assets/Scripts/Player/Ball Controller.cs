@@ -36,13 +36,18 @@ public class BallController : NetworkBehaviour
     [SerializeField] Transform frontIndicator;
     [SerializeField] float indicatorOffsetMultiplier = 1.5f;
     [SerializeField] float indicatorSmoothSpeed = 8f;
+    [SerializeField] bool debugMode = false;
     public Vector3 Front { get; private set; } = Vector3.forward;
     Vector3 lastInputDir = Vector3.forward;
 
     Vector3 currentPlatformVelocity = Vector3.zero;
 
     Vector3 trackedPlatformVelocity = Vector3.zero;
+
+    Vector3 ownVelocity = Vector3.zero;
+
     [SerializeField]
+    [Tooltip("How quickly the ball's tracked velocity ramps to match a newly-landed-on platform, avoiding an instant pop. Higher = faster pickup.")]
     float platformCatchUpRate = 40f;
 
     bool wasOnPlatformLastFrame = false;
@@ -397,7 +402,7 @@ public class BallController : NetworkBehaviour
     {
         if (!IsServer)
             return;
-        
+
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
@@ -425,16 +430,21 @@ public class BallController : NetworkBehaviour
 
         OnAliveChanged(false, IsAlive.Value);
     }
-    
+
     private void Awake()
     {
-        // Disables player control until the ball has been movedto spawn position
-        // Otherwise player position desyncs
         SceneManager.sceneLoaded += OnSceneLoaded;
-        IsAlive.OnValueChanged += OnAliveChanged;
+        if (debugMode)
+        {
+            IsAlive.Value = true;
+        }
+        else
+        {
+            IsAlive.OnValueChanged += OnAliveChanged;
+        }
     }
-    
-    private void OnAliveChanged(bool prev,  bool current)
+
+    private void OnAliveChanged(bool prev, bool current)
     {
         Debug.Log($"${OwnerClientId}: IsAlive Changed to - {current}");
         if (current) Debug.Log($"${OwnerClientId}\nPosition: {rb.position}\nVelocity: {rb.linearVelocity}");
@@ -501,7 +511,7 @@ public class BallController : NetworkBehaviour
             lastInputDir = deltaDir.normalized;
         }
 
-        
+
     }
 
 
@@ -559,8 +569,6 @@ public class BallController : NetworkBehaviour
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, deltaDir);
 
         deltaDir.Normalize();
-
-        float verticalVelocity = rb.linearVelocity.y;
 
 
         PhysicsCalculationsRpc(torqueAxis, deltaDir, currentSurfaceNormal);
@@ -628,47 +636,43 @@ public class BallController : NetworkBehaviour
             }
         }
 
+        float appliedForceMultiplier = groundContacts.Value ? 1f : airControl;
+        Vector3 inputAcceleration = delta * currentForceMultiplier * speed * appliedForceMultiplier / rb.mass;
+        ownVelocity += inputAcceleration * Time.fixedDeltaTime;
+
         if (groundContacts.Value)
         {
-            rb.AddForce(delta * currentForceMultiplier * speed, ForceMode.Force);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier, ForceMode.Force);
         }
         else
         {
-            rb.AddForce(delta * currentForceMultiplier * speed * airControl, ForceMode.Force);
             rb.AddTorque(torqueAxis * torqueAmount * currentTorqueMultiplier * airControl * 0.5f, ForceMode.Force);
         }
 
-        currentVelocity = rb.linearVelocity;
-
-        Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
-
         float dampingFactor = 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
-        trackedPlatformVelocity *= dampingFactor;
+        ownVelocity *= dampingFactor;
 
         bool justLeftPlatform = wasOnPlatformLastFrame && !IsOnPlatform;
 
-        Vector3 ownHorizontalVelocity;
-
         if (justLeftPlatform)
         {
-            ownHorizontalVelocity = horizontalVelocity;
+            ownVelocity += trackedPlatformVelocity;
+            trackedPlatformVelocity = Vector3.zero;
         }
-        else
-        {
-            ownHorizontalVelocity = horizontalVelocity - trackedPlatformVelocity;
 
-            if (ownHorizontalVelocity.magnitude > maxHorizontalSpeed)
-            {
-                ownHorizontalVelocity = ownHorizontalVelocity.normalized * maxHorizontalSpeed;
-            }
+        if (ownVelocity.magnitude > maxHorizontalSpeed)
+        {
+            ownVelocity = ownVelocity.normalized * maxHorizontalSpeed;
         }
 
         Vector3 desiredPlatformVelocity = IsOnPlatform ? currentPlatformVelocity : Vector3.zero;
 
-        trackedPlatformVelocity = Vector3.MoveTowards(trackedPlatformVelocity, desiredPlatformVelocity, platformCatchUpRate * Time.fixedDeltaTime);
+        trackedPlatformVelocity = Vector3.MoveTowards(
+            trackedPlatformVelocity,
+            desiredPlatformVelocity,
+            platformCatchUpRate * Time.fixedDeltaTime);
 
-        horizontalVelocity = ownHorizontalVelocity + trackedPlatformVelocity;
+        Vector3 horizontalVelocity = ownVelocity + trackedPlatformVelocity;
 
         float verticalVelocity = Mathf.Clamp(rb.linearVelocity.y, -maxVerticalSpeed, maxVerticalSpeed);
         rb.linearVelocity = new Vector3(horizontalVelocity.x, verticalVelocity, horizontalVelocity.z);

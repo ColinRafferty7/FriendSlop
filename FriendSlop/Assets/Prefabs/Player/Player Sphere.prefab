@@ -377,6 +377,7 @@ MonoBehaviour:
   frontIndicator: {fileID: 5209117732065110345}
   indicatorOffsetMultiplier: 1.5
   indicatorSmoothSpeed: 20
+  debugMode: 1
   platformCatchUpRate: 1000
   surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
   maxSurfaceAngle: 60
@@ -386,6 +387,11 @@ MonoBehaviour:
   defaultTorqueMultiplier: 1
   defaultAngularFriction: 1
   defaultLinearFriction: 1
+  groundContacts:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
   currentAngularFriction: 1
   currentLinearFriction: 1
   IsAlive:
@@ -427,13 +433,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a698d0c6b2bec84e844518ec5ae71ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 56d13938908bf654caed54ddbf577a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
   ShowTopMostFoldoutHeaderGroup: 1
-  SpawnPoints: {fileID: 11400000, guid: 8b079d0f92e13694099c55b2e9208e28, type: 2}
-  controller: {fileID: -6382130528330964693}
-  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
-  ShowTopMostFoldoutHeaderGroup: 1
+  palette: []

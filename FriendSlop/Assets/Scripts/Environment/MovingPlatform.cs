@@ -3,15 +3,15 @@ using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
-/// Moves this platform along a Bezier path. The platform itself is kinematic, so
-/// Unity's own physics naturally carries any dynamic Rigidbody resting on it via
-/// normal contact/friction resolution - no manual translation code needed here or
-/// on the rider's side.
+/// Moves this platform along a Bezier path. The platform itself is kinematic.
 ///
-/// This script still tracks riders and sends them the platform's current velocity,
-/// but that's now used ONLY for BallController's rolling-rotation math (so a ball
-/// doesn't visually spin just from being carried with zero slip) - not for moving
-/// the ball itself.
+/// Friction between the ball and platform should be kept near-zero, since actual
+/// carrying is handled entirely by BallController's own velocity tracking - this
+/// script's job is just to move itself and tell riders its current velocity via
+/// SetPlatformVelocity/SetOnPlatform. Relying on Unity's natural contact-push here
+/// as well (rather than keeping friction low) would create two competing carrying
+/// mechanisms at once, which is what caused the runaway-acceleration bugs earlier
+/// in this system's development.
 /// </summary>
 public class MovingPlatform : NetworkBehaviour
 {
@@ -71,8 +71,9 @@ public class MovingPlatform : NetworkBehaviour
             BallController ball = rider.GetComponentInParent<BallController>();
             if (ball == null) continue;
 
-            // Purely informational for rotation-matching purposes now - see class
-            // summary above. Not used to move the ball.
+            // Drives both the rolling-rotation math AND the actual carrying/momentum
+            // tracking in BallController - see that script for the velocity split
+            // between the ball's own motion and the platform's contribution.
             ball.SetPlatformVelocity(platformVelocity);
         }
     }
