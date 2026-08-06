@@ -130,11 +130,7 @@ GameObject:
   - component: {fileID: -4645308801868793636}
   - component: {fileID: -6382130528330964693}
   - component: {fileID: 432587188709244947}
-<<<<<<< HEAD
   - component: {fileID: -8478353992886602366}
-=======
-  - component: {fileID: 8609593288347754991}
->>>>>>> f7d99bd208e4e061d9ecc6c5551936317d5cc331
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -437,7 +433,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-<<<<<<< HEAD
   m_Script: {fileID: 11500000, guid: 56d13938908bf654caed54ddbf577a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
@@ -452,8 +447,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-=======
->>>>>>> f7d99bd208e4e061d9ecc6c5551936317d5cc331
   m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
