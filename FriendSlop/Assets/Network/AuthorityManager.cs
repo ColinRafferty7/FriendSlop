@@ -4,8 +4,11 @@ using Unity.Netcode;
 
 public class AuthorityManager : NetworkBehaviour
 {
-    void Awake()
+    public override void OnNetworkSpawn()
     {
-
+        if (!IsServer)
+        {
+            Destroy(gameObject);
+        }
     }
 }
