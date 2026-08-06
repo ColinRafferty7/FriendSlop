@@ -129,8 +129,8 @@ GameObject:
   - component: {fileID: 5115585262971362756}
   - component: {fileID: -4645308801868793636}
   - component: {fileID: -6382130528330964693}
-  - component: {fileID: 6794983978138688053}
   - component: {fileID: 432587188709244947}
+  - component: {fileID: 8609593288347754991}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -386,6 +386,11 @@ MonoBehaviour:
   defaultTorqueMultiplier: 1
   defaultAngularFriction: 1
   defaultLinearFriction: 1
+  groundContacts:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
   currentAngularFriction: 1
   currentLinearFriction: 1
   IsAlive:
@@ -399,7 +404,7 @@ MonoBehaviour:
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
   mesh: {fileID: 2558198393808217373}
---- !u!114 &6794983978138688053
+--- !u!114 &432587188709244947
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -410,7 +415,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9cec88cb9dd3694a92527933113c82c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerColorPicker
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
   ShowTopMostFoldoutHeaderGroup: 1
   ballRenderer: {fileID: 2558198393808217373}
   ColorIndex:
@@ -418,7 +423,7 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: -1
---- !u!114 &432587188709244947
+--- !u!114 &8609593288347754991
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -427,12 +432,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a698d0c6b2bec84e844518ec5ae71ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
-  ShowTopMostFoldoutHeaderGroup: 1
-  SpawnPoints: {fileID: 11400000, guid: 8b079d0f92e13694099c55b2e9208e28, type: 2}
-  controller: {fileID: -6382130528330964693}
   m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTarget

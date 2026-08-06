@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 
 [RequireComponent(typeof(Camera))]
-public class DynamicCameraController : MonoBehaviour
+public class DynamicCameraController : NetworkBehaviour
 {
     public static DynamicCameraController Instance { get; private set; }
 
@@ -65,6 +66,7 @@ public class DynamicCameraController : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (!IsServer) return;
         
         targets.RemoveAll(t => t == null);
 
