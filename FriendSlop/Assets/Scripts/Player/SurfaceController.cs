@@ -23,6 +23,8 @@ public class SurfaceController : MonoBehaviour
 
     public Vector3 surfaceNormal {get; private set;} = Vector3.up;
 
+    public bool groundContacts = false;
+
     private void Awake()
     {
         stats = GetComponent<PlayerStats>();
@@ -47,6 +49,7 @@ public class SurfaceController : MonoBehaviour
         if (floorContactCount == 0) return;
 
         frameHasFloorContact = true;
+        groundContacts = true;
 
 
         if (collision.collider != lastGroundCollider)
@@ -80,6 +83,7 @@ public class SurfaceController : MonoBehaviour
             lastGroundCollider = null;
             currentSurfaceData = null;
         }
+        groundContacts = false;
     }
 
     void ApplySurfaceValues(SurfaceData data)

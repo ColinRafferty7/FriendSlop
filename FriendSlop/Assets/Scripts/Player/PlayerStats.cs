@@ -21,9 +21,12 @@ public class PlayerStats : MonoBehaviour
     private float ballRadius;
     #endregion
 
+    private Rigidbody rb;
+
     private void Start()
     {
         ballRadius = GetComponent<SphereCollider>().radius * transform.lossyScale.x;
+        rb = GetComponent<Rigidbody>();
     }
 
     public void UpdateStats(SurfaceData surface)
@@ -34,6 +37,11 @@ public class PlayerStats : MonoBehaviour
         maxAngularVelocity = surface.maxAngularVelocity;
         linearFriction = surface.linearFriction;
         angularFriction = surface.angularFriction;
+
+        rb.linearDamping = linearFriction;
+        rb.angularDamping = angularFriction;
+
+        maxAngularVelocity = 5f / ballRadius;
     }
 
     public float GetSpeed()

@@ -278,6 +278,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
   ShowTopMostFoldoutHeaderGroup: 1
+  componentMode: 0
+  componentList: []
 --- !u!114 &163153835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -507,6 +509,14 @@ PrefabInstance:
     - target: {fileID: 5430076579151395571, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
+      propertyPath: m_ProtocolType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
+      propertyPath: ConnectionData.Port
+      value: 7778
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

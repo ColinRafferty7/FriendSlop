@@ -17,6 +17,12 @@ private void PhysicsCalculations()
     {
 }
 
+
 - State Independence
 
 Try not to always rely on states
+
+
+- Global Variables = Cringe
+
+When there is a problem with a global variable that is being touched by 15 different function, it is almost impossible to find which function is causing the problem. It is best to not change the value of global variables across many different functions/scripts, instead just passing a read value. Global state is still very important for things that need to be access all across a script or read from other scripts, but limit how many access points you are giving to your variables.

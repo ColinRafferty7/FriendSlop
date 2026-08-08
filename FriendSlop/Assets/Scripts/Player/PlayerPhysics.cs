@@ -60,7 +60,7 @@ public class PlayerPhysics : NetworkBehaviour
 
     public void SetMovementDelta(Vector3 delta)
     {
-        movementDir = delta;
+        movementDir = delta.normalized;
     }
 
     private void PhysicsCalculations(Vector3 delta)
@@ -85,7 +85,10 @@ public class PlayerPhysics : NetworkBehaviour
 
         ApplyVelocity(horizontalVelocity);
 
-        rb.angularVelocity = Vector3.ClampMagnitude(rb.angularVelocity, stats.GetMaxAngularVelocity());
+        if (rb.angularVelocity.magnitude > maxAngularVelocity)
+        {
+            rb.angularVelocity = rb.angularVelocity.normalized * maxAngularVelocity;
+        }
 
         surfaceController.SetWasOnPlatform();
     }
@@ -94,34 +97,36 @@ public class PlayerPhysics : NetworkBehaviour
     {
         Vector3 relativeVelocity = CalculateRelativeVelocity(rb);
 
-        if (relativeVelocity.magnitude < 0.01f) return;
-        if (surfaceController.surfaceType == SurfaceType.Slippery) return;
+        if (surfaceController.surfaceType != SurfaceType.Slippery && relativeVelocity.magnitude > 0.01f)
+        {
+            float angularSpeed = relativeVelocity.magnitude / stats.GetBallRadius();
 
-        float angularSpeed = relativeVelocity.magnitude / stats.GetBallRadius();
+            Vector3 rotationAxis = Vector3.Cross(Vector3.up, relativeVelocity.normalized);
 
-        Vector3 rotationAxis = Vector3.Cross(Vector3.up, relativeVelocity.normalized);
-
-        rb.angularVelocity = rotationAxis * angularSpeed;
+            rb.angularVelocity = rotationAxis * angularSpeed;
+        }
     }
 
     private void HandleStickySurface(Vector3 delta)
     {
-        if (surfaceController.surfaceType != SurfaceType.Sticky) return;
-
-        Vector3 gravityForce = Physics.gravity * rb.mass;
-        Vector3 slideComponent = gravityForce - Vector3.Project(gravityForce, surfaceController.surfaceNormal);
-
-        float inputAlignment = delta.magnitude > 0.01f ? Vector3.Dot(delta.normalized, slideComponent.normalized) : -1f;
-
-        if (inputAlignment < 0.3f)
+        if (surfaceController.surfaceType == SurfaceType.Sticky)
         {
-            rb.AddForce(-slideComponent);
+            Vector3 gravityForce = Physics.gravity * rb.mass;
+            Vector3 slideComponent = gravityForce - Vector3.Project(gravityForce, surfaceController.surfaceNormal);
+
+            float inputAlignment = delta.magnitude > 0.01f ? Vector3.Dot(delta.normalized, slideComponent.normalized) : -1f;
+
+            if (inputAlignment < 0.3f)
+            {
+                rb.AddForce(-slideComponent);
+            }
         }
     }
 
     private void ApplyAcceleration(Vector3 delta)
     {
-        Vector3 inputAcceleration = delta * stats.GetSpeed() / rb.mass;
+        float appliedForceMultiplier = surfaceController.groundContacts ? 1f : airControl;
+        Vector3 inputAcceleration = delta * stats.GetSpeed() * appliedForceMultiplier / rb.mass;
         ownVelocity += inputAcceleration * Time.fixedDeltaTime;
     }
 
@@ -129,12 +134,20 @@ public class PlayerPhysics : NetworkBehaviour
     {
         Vector3 torqueAxis = Vector3.Cross(Vector3.up, delta);
 
-        rb.AddTorque(torqueAxis * stats.GetTorque(), ForceMode.Force);
+        if (surfaceController.groundContacts)
+        {
+            rb.AddTorque(torqueAxis * stats.GetTorque(), ForceMode.Force);
+        }
+        else
+        {
+            rb.AddTorque(torqueAxis * stats.GetTorque() * airControl * 0.5f, ForceMode.Force);
+        }
     }
 
     private void DampVelocity()
     {
-        ownVelocity *= 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
+        float dampingFactor = 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
+        ownVelocity *= dampingFactor;
     }
 
     private void LeavingPlatform()
@@ -150,12 +163,15 @@ public class PlayerPhysics : NetworkBehaviour
 
     private void ClampVelocity()
     {
-        ownVelocity = Vector3.ClampMagnitude(ownVelocity, maxHorizontalSpeed);
+        if (ownVelocity.magnitude > maxHorizontalSpeed)
+        {
+            ownVelocity = ownVelocity.normalized * maxHorizontalSpeed;
+        }
     }
 
     private void PlatformCatchUp()
     {
-        Vector3 desiredPlatformVelocity = surfaceController.IsOnPlatform ? currentPlatformVelocity : Vector3.zero;
+        Vector3 desiredPlatformVelocity = surfaceController.IsOnPlatform ? surfaceController.currentPlatformVelocity : Vector3.zero;
 
         trackedPlatformVelocity = Vector3.MoveTowards(
             trackedPlatformVelocity,
@@ -171,7 +187,12 @@ public class PlayerPhysics : NetworkBehaviour
 
     private Vector3 CalculateRelativeVelocity(Rigidbody rb)
     {
-        Vector3 worldVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        return (worldVelocity - trackedPlatformVelocity);
+        Vector3 currentVelocity = rb.linearVelocity;
+
+        Vector3 worldVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
+
+        Vector3 relativeVelocity = worldVelocity - trackedPlatformVelocity;
+
+        return relativeVelocity;
     }
 }
