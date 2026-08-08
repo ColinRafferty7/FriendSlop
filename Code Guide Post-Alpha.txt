@@ -1,0 +1,22 @@
+Code Guide Post-Alpha
+
+- Functions Should Only Do One Thing*
+
+Each function you create should only have one responsibility ideally. When you call a function and you are not getting the output you expect, it is hard to debug when it is 80 lines of code and a lot of values are being changed. It is better to break it up into a lot of smaller concise functions, and then call those in sequence. This makes it easy to change out those functions later on without updating any of the other logic. It also allows for you to see a high level overview of what a function does.
+
+Example: 
+private void PhysicsCalculations()
+{
+    CalculateVelocity();
+    
+    MoveBall();
+
+    if (PlayerCanFall()())
+    {
+	DropPlayer();
+    {
+}
+
+- State Independence
+
+Try not to always rely on states

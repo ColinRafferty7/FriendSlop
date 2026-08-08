@@ -34,4 +34,27 @@ public class CameraTarget : NetworkBehaviour
         DynamicCameraController.Instance.RegisterTarget(transform);
         registerCoroutine = null;
     }
+
+    // Moved this function into camera target because its camera/player
+    // related, but it could hypothetically go somewhere else as a static function
+    public static Vector3 GetCameraRelativeInputDirection(float horizontal, float vertical)
+    {
+        Transform camTransform = DynamicCameraController.Instance != null
+            ? DynamicCameraController.Instance.transform
+            : null;
+
+
+        Vector3 camForward = camTransform != null ? camTransform.forward : Vector3.forward;
+        Vector3 camRight = camTransform != null ? camTransform.right : Vector3.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+
+        if (camForward.sqrMagnitude > 0.0001f) camForward.Normalize();
+        if (camRight.sqrMagnitude > 0.0001f) camRight.Normalize();
+
+
+        return camRight * horizontal + camForward * vertical;
+    }
 }

@@ -68,7 +68,7 @@ public class MovingPlatform : NetworkBehaviour
                 continue;
             }
 
-            BallController ball = rider.GetComponentInParent<BallController>();
+            SurfaceController ball = rider.GetComponentInParent<SurfaceController>();
             if (ball == null) continue;
 
             // Drives both the rolling-rotation math AND the actual carrying/momentum
@@ -93,7 +93,7 @@ public class MovingPlatform : NetworkBehaviour
                 {
                     riders.Add(rider);
 
-                    BallController newBall = rider.GetComponentInParent<BallController>();
+                    SurfaceController newBall = rider.GetComponentInParent<SurfaceController>();
                     if (newBall != null)
                     {
                         newBall.SetOnPlatform(true);
@@ -114,7 +114,7 @@ public class MovingPlatform : NetworkBehaviour
 
         riders.Remove(rider);
 
-        BallController ball = rider.GetComponentInParent<BallController>();
+        SurfaceController ball = rider.GetComponentInParent<SurfaceController>();
         if (ball != null)
         {
             ball.SetPlatformVelocity(Vector3.zero);

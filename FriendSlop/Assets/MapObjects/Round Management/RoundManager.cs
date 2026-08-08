@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class RoundManager : NetworkBehaviour
 {
     public static RoundManager Instance { get; private set; }
-    private List<BallController> Players = new List<BallController>();
+    private List<RoundParticipant> Players = new List<RoundParticipant>();
     [SerializeField] SpawnData spawns;
     public NetworkVariable<RoundState> CurrentState;
     public NetworkVariable<int> Countdown = new();
@@ -96,7 +96,7 @@ public class RoundManager : NetworkBehaviour
         UIactive.Value = false;
     }
 
-    public void AddPlayer(BallController player)
+    public void AddPlayer(RoundParticipant player)
     {
         if (Players.Contains(player)) return;
         Players.Add(player);
@@ -106,7 +106,7 @@ public class RoundManager : NetworkBehaviour
 
     private void DespawnAllPlayers()
     {
-        foreach (BallController player in Players)
+        foreach (RoundParticipant player in Players)
         {
             player.Eliminate();
         }
@@ -127,7 +127,7 @@ public class RoundManager : NetworkBehaviour
     private int SpawnAllPlayers()
     {
         int count = 0;
-        foreach (BallController player in Players)
+        foreach (RoundParticipant player in Players)
         {
             player.ResetForRound(spawns.GetRandomSpawnPoint());
             count++;
@@ -135,7 +135,7 @@ public class RoundManager : NetworkBehaviour
         return count;
     }
 
-    public void PlayerEliminated(BallController player)
+    public void PlayerEliminated(RoundParticipant player)
     {
         if (IsLobby)
         {
@@ -162,7 +162,7 @@ public class RoundManager : NetworkBehaviour
         }
         else
         {
-            BallController winner = Players.FirstOrDefault(player => player.IsAlive.Value);
+            RoundParticipant winner = Players.FirstOrDefault(player => player.IsAlive.Value);
 
             message = $"Player #{winner.OwnerClientId} Wins!";
         }

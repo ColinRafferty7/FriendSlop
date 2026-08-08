@@ -128,9 +128,12 @@ GameObject:
   - component: {fileID: -3392162865559732308}
   - component: {fileID: 5115585262971362756}
   - component: {fileID: -4645308801868793636}
-  - component: {fileID: -6382130528330964693}
-  - component: {fileID: 432587188709244947}
-  - component: {fileID: -8478353992886602366}
+  - component: {fileID: 8547092889924936427}
+  - component: {fileID: 4779545412464256078}
+  - component: {fileID: 2519531917112835968}
+  - component: {fileID: 3577216531445108136}
+  - component: {fileID: 1248577132122868044}
+  - component: {fileID: 1136580623981733630}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -266,7 +269,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
@@ -348,7 +351,7 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
---- !u!114 &-6382130528330964693
+--- !u!114 &8547092889924936427
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -357,43 +360,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd0e2bc31cc0e7a40918c99c97c62e3a, type: 3}
+  m_Script: {fileID: 11500000, guid: f03359ece635a944786c4b6d2f51f7f7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BallController
+  m_EditorClassIdentifier: Assembly-CSharp::RoundParticipant
   ShowTopMostFoldoutHeaderGroup: 1
-  isPlayer: 1
-  col: {fileID: 5671199889652238412}
-  rb: {fileID: 4579209932181427402}
-  torqueAmount: 5
-  maxAngularVelocity: 1
-  airControl: 0.5
-  maxVerticalSpeed: 50
-  baseSpeed: 200
-  baseJumpForce: 100
-  baseMaxHorizontalSpeed: 5
-  baseMass: 20
-  maxOwnedAbilities: 4
-  replaceOldestWhenFull: 1
-  frontIndicator: {fileID: 5209117732065110345}
-  indicatorOffsetMultiplier: 1.5
-  indicatorSmoothSpeed: 20
-  debugMode: 1
-  platformCatchUpRate: 1000
-  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
-  maxSurfaceAngle: 60
-  airAngularDrag: 0
-  defaultJumpMultiplier: 1
-  defaultForceMultiplier: 1
-  defaultTorqueMultiplier: 1
-  defaultAngularFriction: 1
-  defaultLinearFriction: 1
-  groundContacts:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  currentAngularFriction: 1
-  currentLinearFriction: 1
+  frontIndicator: {fileID: 1990780518308171158}
+  debug: 1
   IsAlive:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -404,8 +376,7 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
-  mesh: {fileID: 2558198393808217373}
---- !u!114 &432587188709244947
+--- !u!114 &4779545412464256078
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -414,17 +385,35 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9cec88cb9dd3694a92527933113c82c, type: 3}
+  m_Script: {fileID: 11500000, guid: 18d241985b00ac8419a2f38154dfccbe, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
   ShowTopMostFoldoutHeaderGroup: 1
-  ballRenderer: {fileID: 2558198393808217373}
-  ColorIndex:
+--- !u!114 &2519531917112835968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ea47fddd3f44949a7e446dc6a59e8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPhysics
+  ShowTopMostFoldoutHeaderGroup: 1
+  groundContacts:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
-    m_InternalValue: -1
---- !u!114 &8609593288347754991
+    m_InternalValue: 0
+  airControl: 0.5
+  torqueAmount: 5
+  maxHorizontalSpeed: 5
+  MAX_VERTICAL_SPEED: 50
+  maxAngularVelocity: 1
+  platformCatchUpRate: 1000
+--- !u!114 &3577216531445108136
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -433,12 +422,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 6126187246611128173}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56d13938908bf654caed54ddbf577a5a, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c870400b13da0844963a2770c3c5002, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
-  ShowTopMostFoldoutHeaderGroup: 1
-  palette: []
---- !u!114 &-8478353992886602366
+  m_EditorClassIdentifier: Assembly-CSharp::SurfaceController
+  maxSurfaceAngle: 60
+  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
+  currentPlatformVelocity: {x: 0, y: 0, z: 0}
+  trackedPlatformVelocity: {x: 0, y: 0, z: 0}
+  currentSurfaceData: {fileID: 0}
+  surfaceType: 0
+--- !u!114 &1248577132122868044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dbe4ff844589bb4fab873aa83393a0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  baseSpeed: 200
+  baseJumpForce: 100
+  baseTorque: 5
+  maxAngularVelocity: 1
+  linearFriction: 1
+  angularFriction: 1
+--- !u!114 &1136580623981733630
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
