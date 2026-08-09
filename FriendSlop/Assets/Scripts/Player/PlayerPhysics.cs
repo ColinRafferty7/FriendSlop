@@ -58,6 +58,11 @@ public class PlayerPhysics : NetworkBehaviour
         PhysicsCalculations(movementDir);
     }
 
+    public void ApplyForce(Vector3 force)
+    {
+        rb.AddForce(force, ForceMode.Impulse);
+    }
+
     public void ApplyJumpForce()
     {
         if (!surfaceController.groundContacts) return;
