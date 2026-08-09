@@ -367,6 +367,39 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   frontIndicator: {fileID: 1990780518308171158}
   debug: 1
+  isPlayer: 1
+  col: {fileID: 5671199889652238412}
+  rb: {fileID: 4579209932181427402}
+  torqueAmount: 5
+  maxAngularVelocity: 1
+  airControl: 0.5
+  maxVerticalSpeed: 50
+  baseSpeed: 200
+  baseJumpForce: 100
+  baseMaxHorizontalSpeed: 5
+  baseMass: 20
+  maxOwnedAbilities: 4
+  replaceOldestWhenFull: 1
+  frontIndicator: {fileID: 5209117732065110345}
+  indicatorOffsetMultiplier: 1.5
+  indicatorSmoothSpeed: 20
+  debugMode: 1
+  platformCatchUpRate: 1000
+  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
+  maxSurfaceAngle: 45
+  airAngularDrag: 0
+  defaultJumpMultiplier: 1
+  defaultForceMultiplier: 1
+  defaultTorqueMultiplier: 1
+  defaultAngularFriction: 1
+  defaultLinearFriction: 1
+  groundContacts:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  currentAngularFriction: 1
+  currentLinearFriction: 1
   IsAlive:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -415,6 +448,21 @@ MonoBehaviour:
   maxAngularVelocity: 1
   platformCatchUpRate: 1000
 --- !u!114 &3577216531445108136
+    m_InternalValue: -1
+--- !u!114 &-8478353992886602366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &8609593288347754991
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -484,3 +532,6 @@ MonoBehaviour:
   - {fileID: 3577216531445108136}
   - {fileID: 1248577132122868044}
   - {fileID: 1136580623981733630}
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
+  ShowTopMostFoldoutHeaderGroup: 1
+  palette: []
