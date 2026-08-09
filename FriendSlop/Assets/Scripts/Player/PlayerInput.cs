@@ -5,6 +5,7 @@ public class PlayerInput : NetworkBehaviour
 {
     private PlayerPhysics physics;
     private PlayerItems items;
+    [SerializeField] private DirectionIndicator direction;
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class PlayerInput : NetworkBehaviour
         Vector3 deltaDir = CameraTarget.GetCameraRelativeInputDirection(h, v);
 
         ApplyMovementDirRpc(deltaDir);
+        direction.ApplyDirection(deltaDir.normalized);
     }
 
     [Rpc(SendTo.Server)]

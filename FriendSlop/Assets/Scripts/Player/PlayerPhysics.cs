@@ -60,13 +60,14 @@ public class PlayerPhysics : NetworkBehaviour
 
     public void ApplyForce(Vector3 force)
     {
-        rb.AddForce(force, ForceMode.Impulse);
+        rb.AddForce(force, ForceMode.Force);
     }
 
     public void ApplyJumpForce()
     {
+        Debug.Log("Jump Check");
         if (!surfaceController.groundContacts) return;
-
+        Debug.Log("Jump Confirm");
         rb.AddForce(Vector3.up * stats.GetJumpForce(), ForceMode.Impulse);
     }
 
