@@ -368,7 +368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoundParticipant
   ShowTopMostFoldoutHeaderGroup: 1
   frontIndicator: {fileID: 1990780518308171158}
-  debug: 1
+  debug: 0
   IsAlive:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

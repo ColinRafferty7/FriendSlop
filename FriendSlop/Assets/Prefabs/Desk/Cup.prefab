@@ -2427,13 +2427,13 @@ PrefabInstance:
       addedObject: {fileID: 5002218756623646525}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8074252548043975233}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6204290097529912785}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5665718163005714705}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7269918732761822520}
   m_SourcePrefab: {fileID: 100100000, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
 --- !u!1 &6267955825086768521 stripped
 GameObject:
@@ -2452,7 +2452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3501740469
+  GlobalObjectIdHash: 3268315532
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -2539,23 +2539,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 2
---- !u!114 &8074252548043975233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6267955825086768521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
-  AutoUpdateKinematicState: 1
-  AutoSetKinematicOnDespawn: 1
 --- !u!114 &6204290097529912785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2591,6 +2574,22 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2534964839176971238, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
+--- !u!114 &7269918732761822520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6267955825086768521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840cec76c0ccac4f8719dcea759a4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  componentMode: 1
+  componentList:
+  - {fileID: 5002218756623646525}
 --- !u!4 &6753024709556928307 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 79f094103b3937b4eaf7de52b6cd151b, type: 3}
