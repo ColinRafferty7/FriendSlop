@@ -17,6 +17,7 @@ public class AuthorityManager : NetworkBehaviour
         {
             DestroyGameObject();
         }
+        Destroy(this);
     }
 
     private void DestroyComponents()

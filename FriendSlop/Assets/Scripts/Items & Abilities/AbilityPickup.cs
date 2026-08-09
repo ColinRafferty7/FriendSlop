@@ -9,7 +9,7 @@ public class AbilityPickup : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        BallController ball = other.GetComponent<BallController>();
+        PlayerItems ball = other.GetComponent<PlayerItems>();
         if (ball != null)
         {
             ball.CollectAbility(abilityPrefab);

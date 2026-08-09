@@ -93,6 +93,8 @@ public class BallController : NetworkBehaviour
     int swapPressed = 0;
     Vector3 baseScale;
 
+    public NetworkVariable<bool> IsAlive = new(true);
+    public NetworkVariable<int> Score = new(0);
     [SerializeField] private MeshRenderer mesh;
 
     [System.Serializable]
@@ -275,19 +277,198 @@ public class BallController : NetworkBehaviour
         Debug.Log("Equipped: " + currentAbility.GetType().Name);
     }
 
+    public void SetPlatformVelocity(Vector3 velocity)
+    {
+        currentPlatformVelocity = velocity;
+    }
+    public void SetOnPlatform(bool onPlatform)
+    {
+        IsOnPlatform = onPlatform;
+    }
+
+
+    void OnCollisionStay(Collision collision)
+    {
+        Vector3 floorNormalSum = Vector3.zero;
+        int floorContactCount = 0;
+
+        foreach (var contact in collision.contacts)
+        {
+            float angleFromUp = Vector3.Angle(contact.normal, Vector3.up);
+
+            if (angleFromUp <= maxSurfaceAngle)
+            {
+                floorNormalSum += contact.normal;
+                floorContactCount++;
+            }
+        }
+
+
+        if (floorContactCount == 0) return;
+
+        frameHasFloorContact = true;
+
+
+        if (collision.collider != lastGroundCollider)
+        {
+            lastGroundCollider = collision.collider;
+
+
+            SurfaceIdentifier identifier = collision.collider.GetComponent<SurfaceIdentifier>();
+
+            if (identifier != null)
+            {
+                currentSurfaceData = identifier.surfaceData;
+            }
+            else if (surfaceRegistry != null)
+            {
+                currentSurfaceData = surfaceRegistry.GetSurfaceData(collision.collider.sharedMaterial);
+            }
+            else
+            {
+                currentSurfaceData = null;
+            }
+        }
+
+
+        ApplySurfaceValues(currentSurfaceData);
+
+        currentSurfaceNormal = (floorNormalSum / floorContactCount).normalized;
+    }
+
+
+    void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider == lastGroundCollider)
+        {
+            lastGroundCollider = null;
+            currentSurfaceData = null;
+        }
+    }
+
+
+    void ApplySurfaceValues(SurfaceData data)
+    {
+        if (data != null)
+        {
+            currentJumpMultiplier = data.jumpMultiplier;
+            //currentForceMultiplier = data.forceMultiplier;
+            currentAngularFriction = data.angularFriction;
+            currentTorqueMultiplier = data.torqueMultiplier;
+            //currentIsSlipping = data.isSlippingSurface;
+            rb.linearDamping = data.linearFriction;
+            //currentIsSticky = data.isStickySurface;
+            //currentMaxAngularVelocityOverride = data.maxAngularVelocityOverride;
+
+            if (currentIsSlipping)
+                maxAngularVelocity = currentMaxAngularVelocityOverride;
+            else
+                RecalculateRadius();
+
+            return;
+        }
+
+        rb.angularDamping = airAngularDrag;
+        currentJumpMultiplier = defaultJumpMultiplier;
+        currentForceMultiplier = defaultForceMultiplier;
+        rb.linearDamping = defaultLinearFriction;
+        currentAngularFriction = defaultAngularFriction;
+        currentTorqueMultiplier = defaultTorqueMultiplier;
+        currentMaxAngularVelocityOverride = 1f;
+        currentIsSlipping = false;
+        currentIsSticky = false;
+    }
+
+    public void Eliminate()
+    {
+        if (!IsServer)
+            return;
+
+        IsAlive.Value = false;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        //RoundManager.Instance.PlayerEliminated(this);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void EliminateRpc()
+    {
+        Eliminate();
+    }
+
+    public void ResetForRound(Vector3 spawnPoint)
+    {
+        if (!IsServer)
+            return;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rb.position = spawnPoint;
+        rb.rotation = Quaternion.identity;
+
+        IsAlive.Value = true;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ResetForRoundRpc(Vector3 spawnPoint)
+    {
+        ResetForRound(spawnPoint);
+    }
+
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (IsServer)
+        {
+            IsAlive.Value = false;
+        }
+
+        OnAliveChanged(false, IsAlive.Value);
+    }
 
     private void Awake()
     {
-       
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        if (debugMode)
+        {
+            IsAlive.Value = true;
+        }
+        else
+        {
+            IsAlive.OnValueChanged += OnAliveChanged;
+        }
     }
 
-    
+    private void OnAliveChanged(bool prev, bool current)
+    {
+        Debug.Log($"${OwnerClientId}: IsAlive Changed to - {current}");
+        if (current) Debug.Log($"${OwnerClientId}\nPosition: {rb.position}\nVelocity: {rb.linearVelocity}");
+        mesh.enabled = current;
+        col.enabled = current;
+        frontIndicator.gameObject.SetActive(current);
+    }
 
     void Start()
     {
+        //if (RoundManager.Instance != null) RoundManager.Instance.AddPlayer(this);
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
         RecalculateStats();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (!IsServer) return;
+
+        if (RoundManager.Instance != null)
+        {
+            //RoundManager.Instance.AddPlayer(this);
+        }
     }
 
     void Update()
@@ -295,16 +476,19 @@ public class BallController : NetworkBehaviour
         if (IsServer && rb.position.y < -10f)
         {
             Debug.Log("Should be eliminated");
+            Eliminate();
             return;
         }
 
         if (!IsOwner) return;
         if (!isPlayer) return;
+        if (!IsAlive.Value) return;
         if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing) return;
 
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
+        deltaDir = GetCameraRelativeInputDirection(h, v);
 
         if (groundContacts.Value == true && Input.GetKeyDown(KeyCode.Space))
         {
@@ -326,6 +510,8 @@ public class BallController : NetworkBehaviour
         {
             lastInputDir = deltaDir.normalized;
         }
+
+
     }
 
 
@@ -335,8 +521,31 @@ public class BallController : NetworkBehaviour
         rb.AddForce(Vector3.up * jumpForce * currentJumpMultiplier, ForceMode.Impulse);
     }
 
+    private Vector3 GetCameraRelativeInputDirection(float horizontal, float vertical)
+    {
+        Transform camTransform = DynamicCameraController.Instance != null
+            ? DynamicCameraController.Instance.transform
+            : null;
+
+
+        Vector3 camForward = camTransform != null ? camTransform.forward : Vector3.forward;
+        Vector3 camRight = camTransform != null ? camTransform.right : Vector3.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+
+        if (camForward.sqrMagnitude > 0.0001f) camForward.Normalize();
+        if (camRight.sqrMagnitude > 0.0001f) camRight.Normalize();
+
+
+        return camRight * horizontal + camForward * vertical;
+    }
+
+
     void FixedUpdate()
     {
+        if (!IsAlive.Value) return;
         if (RoundManager.Instance.CurrentState.Value != RoundManager.RoundState.Playing) return;
 
         if (frameHasFloorContact)
@@ -348,6 +557,7 @@ public class BallController : NetworkBehaviour
             groundContacts.Value = false;
             lastGroundCollider = null;
             currentSurfaceData = null;
+            ApplySurfaceValues(null);
         }
 
         frameHasFloorContact = false;

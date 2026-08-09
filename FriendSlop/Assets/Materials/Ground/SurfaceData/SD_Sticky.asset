@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18da344f124147f4ba626ba23fac9851, type: 3}
   m_Name: SD_Sticky
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceData
-  isSlippingSurface: 0
-  isStickySurface: 1
+  surfaceType: 2
   linearFriction: 5
   angularFriction: 0.1
-  forceMultiplier: 0.5
+  speedMultiplier: 1
   jumpMultiplier: 0
   torqueMultiplier: 0
-  maxAngularVelocityOverride: 1
+  maxAngularVelocity: 1

@@ -58,6 +58,13 @@ public class PlayerPhysics : NetworkBehaviour
         PhysicsCalculations(movementDir);
     }
 
+    public void ApplyJumpForce()
+    {
+        if (!surfaceController.groundContacts) return;
+
+        rb.AddForce(Vector3.up * stats.GetJumpForce(), ForceMode.Impulse);
+    }
+
     public void SetMovementDelta(Vector3 delta)
     {
         movementDir = delta.normalized;

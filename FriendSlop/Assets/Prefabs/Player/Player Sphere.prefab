@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 3577216531445108136}
   - component: {fileID: 1248577132122868044}
   - component: {fileID: 1136580623981733630}
+  - component: {fileID: 6518768909105953462}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -431,6 +432,7 @@ MonoBehaviour:
   trackedPlatformVelocity: {x: 0, y: 0, z: 0}
   currentSurfaceData: {fileID: 0}
   surfaceType: 0
+  groundContacts: 0
 --- !u!114 &1248577132122868044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -462,3 +464,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &6518768909105953462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840cec76c0ccac4f8719dcea759a4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  componentMode: 1
+  componentList:
+  - {fileID: 2519531917112835968}
+  - {fileID: 8547092889924936427}
+  - {fileID: 3577216531445108136}
+  - {fileID: 1248577132122868044}
+  - {fileID: 1136580623981733630}

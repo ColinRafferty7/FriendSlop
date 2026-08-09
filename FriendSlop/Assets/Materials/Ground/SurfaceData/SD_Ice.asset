@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18da344f124147f4ba626ba23fac9851, type: 3}
   m_Name: SD_Ice
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceData
-  isSlippingSurface: 1
-  isStickySurface: 0
+  surfaceType: 1
   linearFriction: 0.1
   angularFriction: 0.1
-  forceMultiplier: 0.4
+  speedMultiplier: 1
   jumpMultiplier: 1
   torqueMultiplier: 15
-  maxAngularVelocityOverride: 7
+  maxAngularVelocity: 1

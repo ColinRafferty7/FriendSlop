@@ -4,16 +4,29 @@ using Unity.Netcode;
 public class PlayerInput : NetworkBehaviour
 {
     private PlayerPhysics physics;
+    private PlayerItems items;
 
     private void Awake()
     {
         physics = GetComponent<PlayerPhysics>();
+        items = GetComponent<PlayerItems>();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (!IsOwner && !IsServer) Destroy(this);
     }
 
     private void Update()
     {
+        if (!IsOwner) return;
+
         ReadMovementDir();
-        
+
+        ReadJumpInput();
+
+        ReadItemInputs();
     }
 
     private void ReadMovementDir()
@@ -30,5 +43,49 @@ public class PlayerInput : NetworkBehaviour
     public void ApplyMovementDirRpc(Vector3 delta)
     {
         physics.SetMovementDelta(delta);
+    }
+
+    private void ReadJumpInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ApplyJumpRpc();
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ApplyJumpRpc()
+    {
+        physics.ApplyJumpForce();
+    }
+
+    private void ReadItemInputs()
+    {
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            ActivateItemRpc();
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            SwapAbilityRpc(1);
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            SwapAbilityRpc(-1);
+        }
+
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ActivateItemRpc()
+    {
+        items.AttemptActivation();
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SwapAbilityRpc(int index)
+    {
+        items.SwapAbility(index);
     }
 }
