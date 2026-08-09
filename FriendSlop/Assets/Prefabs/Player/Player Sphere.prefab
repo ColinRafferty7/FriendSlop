@@ -131,10 +131,12 @@ GameObject:
   - component: {fileID: 8547092889924936427}
   - component: {fileID: 4779545412464256078}
   - component: {fileID: 2519531917112835968}
-  - component: {fileID: 3577216531445108136}
   - component: {fileID: 1248577132122868044}
   - component: {fileID: 1136580623981733630}
   - component: {fileID: 6518768909105953462}
+  - component: {fileID: -8478353992886602366}
+  - component: {fileID: 8609593288347754991}
+  - component: {fileID: -3226751475885002246}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -244,7 +246,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6126187246611128173}
   serializedVersion: 5
-  m_Mass: 20
+  m_Mass: 15
   m_LinearDamping: 0
   m_AngularDamping: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -367,39 +369,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   frontIndicator: {fileID: 1990780518308171158}
   debug: 1
-  isPlayer: 1
-  col: {fileID: 5671199889652238412}
-  rb: {fileID: 4579209932181427402}
-  torqueAmount: 5
-  maxAngularVelocity: 1
-  airControl: 0.5
-  maxVerticalSpeed: 50
-  baseSpeed: 200
-  baseJumpForce: 100
-  baseMaxHorizontalSpeed: 5
-  baseMass: 20
-  maxOwnedAbilities: 4
-  replaceOldestWhenFull: 1
-  frontIndicator: {fileID: 5209117732065110345}
-  indicatorOffsetMultiplier: 1.5
-  indicatorSmoothSpeed: 20
-  debugMode: 1
-  platformCatchUpRate: 1000
-  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
-  maxSurfaceAngle: 45
-  airAngularDrag: 0
-  defaultJumpMultiplier: 1
-  defaultForceMultiplier: 1
-  defaultTorqueMultiplier: 1
-  defaultAngularFriction: 1
-  defaultLinearFriction: 1
-  groundContacts:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  currentAngularFriction: 1
-  currentLinearFriction: 1
   IsAlive:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -447,40 +416,7 @@ MonoBehaviour:
   MAX_VERTICAL_SPEED: 50
   maxAngularVelocity: 1
   platformCatchUpRate: 1000
---- !u!114 &3577216531445108136
-    m_InternalValue: -1
---- !u!114 &-8478353992886602366
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
-  ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &8609593288347754991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c870400b13da0844963a2770c3c5002, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SurfaceController
-  maxSurfaceAngle: 60
-  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
-  currentPlatformVelocity: {x: 0, y: 0, z: 0}
-  trackedPlatformVelocity: {x: 0, y: 0, z: 0}
-  currentSurfaceData: {fileID: 0}
-  surfaceType: 0
-  groundContacts: 0
+  inputSmoothTime: 0.01
 --- !u!114 &1248577132122868044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -493,7 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbe4ff844589bb4fab873aa83393a0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  baseSpeed: 200
+  baseSpeed: 100
   baseJumpForce: 100
   baseTorque: 5
   maxAngularVelocity: 1
@@ -529,9 +465,54 @@ MonoBehaviour:
   componentList:
   - {fileID: 2519531917112835968}
   - {fileID: 8547092889924936427}
-  - {fileID: 3577216531445108136}
+  - {fileID: 0}
   - {fileID: 1248577132122868044}
   - {fileID: 1136580623981733630}
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
+--- !u!114 &-8478353992886602366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
   ShowTopMostFoldoutHeaderGroup: 1
-  palette: []
+--- !u!114 &8609593288347754991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c870400b13da0844963a2770c3c5002, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurfaceController
+  maxSurfaceAngle: 60
+  surfaceRegistry: {fileID: 11400000, guid: 5301b1584880f0b4f9f7d501952294ba, type: 2}
+  currentPlatformVelocity: {x: 0, y: 0, z: 0}
+  trackedPlatformVelocity: {x: 0, y: 0, z: 0}
+  currentSurfaceData: {fileID: 0}
+  surfaceType: 0
+  currentWallSurfaceData: {fileID: 0}
+  wallSurfaceType: 0
+  groundContacts: 0
+--- !u!114 &-3226751475885002246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08d2ebf8edb2a14485cd9b55fb686bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItems
+  maxOwnedAbilities: 3
+  replaceOldestWhenFull: 1

@@ -15,7 +15,7 @@ MonoBehaviour:
   surfaceType: 0
   linearFriction: 0
   angularFriction: 0
-  speedMultiplier: 1
+  speedMultiplier: 0.3
   jumpMultiplier: 0
   torqueMultiplier: 5
   maxAngularVelocity: 1
