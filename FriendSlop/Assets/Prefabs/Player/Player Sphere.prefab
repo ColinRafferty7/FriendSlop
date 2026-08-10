@@ -246,7 +246,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6126187246611128173}
   serializedVersion: 5
-  m_Mass: 15
+  m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -414,7 +414,7 @@ MonoBehaviour:
   torqueAmount: 5
   maxHorizontalSpeed: 5
   MAX_VERTICAL_SPEED: 50
-  maxAngularVelocity: 1
+  maxAngularVelocity: 20
   platformCatchUpRate: 1000
   inputSmoothTime: 0.01
 --- !u!114 &1248577132122868044
@@ -429,8 +429,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbe4ff844589bb4fab873aa83393a0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  baseSpeed: 100
-  baseJumpForce: 100
+  baseSpeed: 5
+  baseJumpForce: 5
   baseTorque: 5
   maxAngularVelocity: 1
   linearFriction: 1
