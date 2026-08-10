@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SD_Base
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceData
   surfaceType: 0
-  linearFriction: 0.5
-  angularFriction: 0
+  linearFriction: 1
+  angularFriction: 1
   speedMultiplier: 1
   jumpMultiplier: 1
   torqueMultiplier: 0

@@ -28,6 +28,14 @@ public class PlayerPhysics : NetworkBehaviour
     [SerializeField] float platformCatchUpRate = 1000f;
     #endregion
 
+    #region ========== Input smoothing ===================
+    [Tooltip("How quickly applied input ramps toward the actual input direction. Lower = smoother, less abrupt starts/stops. Higher = snappier, more immediate.")]
+    [SerializeField] float inputSmoothTime = 0.15f;
+
+    Vector3 smoothedDelta = Vector3.zero;
+    Vector3 smoothedDeltaVelocity = Vector3.zero;
+    #endregion
+
     #region ========== Local physics states =============
     float currentForceMultiplier = 1f;
     float currentJumpMultiplier = 1f;
@@ -38,10 +46,13 @@ public class PlayerPhysics : NetworkBehaviour
     Vector3 trackedPlatformVelocity = Vector3.zero;
     Vector3 ownVelocity = Vector3.zero;
 
+    Vector3 externalVelocity = Vector3.zero;
+
     Vector3 movementDir = Vector3.zero;
 
     bool currentIsSlipping = false;
     bool currentIsSticky = false;
+    bool justLanded = false;
     #endregion
 
     private void Start()
@@ -55,7 +66,26 @@ public class PlayerPhysics : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        rb.WakeUp();
+
+        bool wasGrounded = surfaceController.groundContacts;
+
+        surfaceController.ResolveGroundState();
+
+        justLanded = !wasGrounded && surfaceController.groundContacts;
+
+        CaptureLandingMomentum();
+
         PhysicsCalculations(movementDir);
+    }
+
+    private void CaptureLandingMomentum()
+    {
+        if (!justLanded) return;
+
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        ownVelocity = horizontalVelocity;
     }
 
     public void ApplyJumpForce()
@@ -70,15 +100,49 @@ public class PlayerPhysics : NetworkBehaviour
         movementDir = delta.normalized;
     }
 
+    public void AddForce(Vector3 force, ForceMode mode = ForceMode.Force)
+    {
+        Vector3 velocityDelta;
+
+        switch (mode)
+        {
+            case ForceMode.Force:
+                velocityDelta = (force / rb.mass) * Time.fixedDeltaTime;
+                break;
+
+            case ForceMode.Acceleration:
+                velocityDelta = force * Time.fixedDeltaTime;
+                break;
+
+            case ForceMode.Impulse:
+                velocityDelta = force / rb.mass;
+                break;
+
+            case ForceMode.VelocityChange:
+                velocityDelta = force;
+                break;
+
+            default:
+                velocityDelta = Vector3.zero;
+                break;
+        }
+
+        externalVelocity += velocityDelta;
+    }
+
     private void PhysicsCalculations(Vector3 delta)
     {
+        smoothedDelta = Vector3.SmoothDamp(smoothedDelta, delta, ref smoothedDeltaVelocity, inputSmoothTime, Mathf.Infinity, Time.fixedDeltaTime);
+
         ApplyRoll();
 
-        HandleStickySurface(delta);
+        ApplySlopeGravity();
 
-        ApplyAcceleration(delta);
+        ApplyAcceleration(smoothedDelta);
 
-        ApplyTorque(delta);
+        ApplyWallCollision();
+
+        ApplyTorque(smoothedDelta);
 
         DampVelocity();
 
@@ -88,7 +152,7 @@ public class PlayerPhysics : NetworkBehaviour
 
         PlatformCatchUp();
 
-        Vector3 horizontalVelocity = ownVelocity + trackedPlatformVelocity;
+        Vector3 horizontalVelocity = ownVelocity + trackedPlatformVelocity + externalVelocity;
 
         ApplyVelocity(horizontalVelocity);
 
@@ -99,9 +163,11 @@ public class PlayerPhysics : NetworkBehaviour
 
         surfaceController.SetWasOnPlatform();
     }
-
     private void ApplyRoll()
     {
+        if (!surfaceController.groundContacts) return;
+        if (justLanded) return;
+
         Vector3 relativeVelocity = CalculateRelativeVelocity(rb);
 
         if (surfaceController.surfaceType != SurfaceType.Slippery && relativeVelocity.magnitude > 0.01f)
@@ -114,27 +180,82 @@ public class PlayerPhysics : NetworkBehaviour
         }
     }
 
-    private void HandleStickySurface(Vector3 delta)
+    private void ApplySlopeGravity()
     {
-        if (surfaceController.surfaceType == SurfaceType.Sticky)
-        {
-            Vector3 gravityForce = Physics.gravity * rb.mass;
-            Vector3 slideComponent = gravityForce - Vector3.Project(gravityForce, surfaceController.surfaceNormal);
+        if (!surfaceController.groundContacts) return;
+        if (surfaceController.surfaceType == SurfaceType.Sticky) return;
 
-            float inputAlignment = delta.magnitude > 0.01f ? Vector3.Dot(delta.normalized, slideComponent.normalized) : -1f;
+        Vector3 slideComponent = Vector3.ProjectOnPlane(Physics.gravity, surfaceController.surfaceNormal);
 
-            if (inputAlignment < 0.3f)
-            {
-                rb.AddForce(-slideComponent);
-            }
-        }
+        ownVelocity += slideComponent * Time.fixedDeltaTime;
     }
 
     private void ApplyAcceleration(Vector3 delta)
     {
         float appliedForceMultiplier = surfaceController.groundContacts ? 1f : airControl;
+
+        if (surfaceController.groundContacts && surfaceController.surfaceType != SurfaceType.Sticky)
+        {
+            appliedForceMultiplier *= GetClimbMultiplier(delta);
+        }
+
         Vector3 inputAcceleration = delta * stats.GetSpeed() * appliedForceMultiplier / rb.mass;
+
         ownVelocity += inputAcceleration * Time.fixedDeltaTime;
+    }
+
+    private float GetClimbMultiplier(Vector3 delta)
+    {
+        if (delta.sqrMagnitude < 0.0001f) return 1f;
+
+        Vector3 gravity = Physics.gravity;
+
+        Vector3 downhill = gravity - Vector3.Project(gravity, surfaceController.surfaceNormal);
+
+        if (downhill.sqrMagnitude < 0.0001f) return 1f;
+
+        Vector3 uphillDir = -downhill.normalized;
+
+        float uphillAlignment = Vector3.Dot(delta.normalized, uphillDir);
+
+        if (uphillAlignment <= 0f) return 1f;
+
+        float slopeAngle = Vector3.Angle(surfaceController.surfaceNormal, Vector3.up);
+
+        float t = Mathf.Clamp01(slopeAngle / surfaceController.maxSurfaceAngle);
+
+        float climbMultiplier = 1f - Mathf.SmoothStep(0f, 1f, t);
+
+        return Mathf.Lerp(1f, climbMultiplier, uphillAlignment);
+    }
+
+    private void ApplyWallCollision()
+    {
+        if (!surfaceController.wallContact) return;
+
+        if (surfaceController.wallSurfaceType != SurfaceType.Sticky && !surfaceController.groundContacts)
+        {
+            Vector3 downhillAlongWall = Physics.gravity - Vector3.Project(Physics.gravity, surfaceController.wallNormal);
+
+            if (downhillAlongWall.sqrMagnitude > 0.0001f)
+            {
+                Vector3 downhillDir = downhillAlongWall.normalized;
+
+                float downhillComponent = Vector3.Dot(ownVelocity, downhillDir);
+
+                if (downhillComponent > 0f)
+                {
+                    ownVelocity -= downhillDir * downhillComponent;
+                }
+            }
+        }
+
+        float intoWall = Vector3.Dot(ownVelocity, -surfaceController.wallNormal);
+
+        if (intoWall > 0f)
+        {
+            ownVelocity += surfaceController.wallNormal * intoWall;
+        }
     }
 
     private void ApplyTorque(Vector3 delta)
@@ -154,7 +275,10 @@ public class PlayerPhysics : NetworkBehaviour
     private void DampVelocity()
     {
         float dampingFactor = 1f / (1f + rb.linearDamping * Time.fixedDeltaTime);
+
         ownVelocity *= dampingFactor;
+
+        externalVelocity *= dampingFactor;
     }
 
     private void LeavingPlatform()
@@ -164,10 +288,15 @@ public class PlayerPhysics : NetworkBehaviour
         if (justLeftPlatform)
         {
             ownVelocity += trackedPlatformVelocity;
+
             trackedPlatformVelocity = Vector3.zero;
         }
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Hit: " + other.gameObject.name);
 
+    }
     private void ClampVelocity()
     {
         if (ownVelocity.magnitude > maxHorizontalSpeed)
@@ -180,25 +309,19 @@ public class PlayerPhysics : NetworkBehaviour
     {
         Vector3 desiredPlatformVelocity = surfaceController.IsOnPlatform ? surfaceController.currentPlatformVelocity : Vector3.zero;
 
-        trackedPlatformVelocity = Vector3.MoveTowards(
-            trackedPlatformVelocity,
-            desiredPlatformVelocity,
-            platformCatchUpRate * Time.fixedDeltaTime);
+        trackedPlatformVelocity = Vector3.MoveTowards(trackedPlatformVelocity, desiredPlatformVelocity, platformCatchUpRate * Time.fixedDeltaTime);
     }
 
     private void ApplyVelocity(Vector3 horVelo)
     {
         float verticalVelocity = Mathf.Clamp(rb.linearVelocity.y, -MAX_VERTICAL_SPEED, MAX_VERTICAL_SPEED);
+
         rb.linearVelocity = new Vector3(horVelo.x, verticalVelocity, horVelo.z);
     }
 
     private Vector3 CalculateRelativeVelocity(Rigidbody rb)
     {
-        Vector3 currentVelocity = rb.linearVelocity;
-
-        Vector3 worldVelocity = new Vector3(currentVelocity.x, 0, currentVelocity.z);
-
-        Vector3 relativeVelocity = worldVelocity - trackedPlatformVelocity;
+        Vector3 relativeVelocity = ownVelocity - trackedPlatformVelocity;
 
         return relativeVelocity;
     }
