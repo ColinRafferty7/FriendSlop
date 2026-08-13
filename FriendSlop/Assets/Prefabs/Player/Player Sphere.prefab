@@ -131,12 +131,10 @@ GameObject:
   - component: {fileID: 8547092889924936427}
   - component: {fileID: 4779545412464256078}
   - component: {fileID: 2519531917112835968}
-  - component: {fileID: 8609593288347754991}
   - component: {fileID: 1248577132122868044}
   - component: {fileID: 1136580623981733630}
   - component: {fileID: 6518768909105953462}
   - component: {fileID: -8478353992886602366}
-  - component: {fileID: 8609593288347754991}
   - component: {fileID: -3226751475885002246}
   - component: {fileID: 4204856728868956354}
   m_Layer: 0
@@ -418,7 +416,6 @@ MonoBehaviour:
   MAX_VERTICAL_SPEED: 50
   maxAngularVelocity: 20
   platformCatchUpRate: 1000
-  inputSmoothTime: 0.01
 --- !u!114 &1248577132122868044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -468,7 +465,7 @@ MonoBehaviour:
   - {fileID: 2519531917112835968}
   - {fileID: 8547092889924936427}
   - {fileID: 0}
-  - {fileID: 8609593288347754991}
+  - {fileID: 0}
   - {fileID: 1248577132122868044}
   - {fileID: 1136580623981733630}
 --- !u!114 &-8478353992886602366
@@ -484,7 +481,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &8609593288347754991
+--- !u!114 &-3226751475885002246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08d2ebf8edb2a14485cd9b55fb686bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItems
+  maxOwnedAbilities: 3
+  replaceOldestWhenFull: 1
 --- !u!114 &4204856728868956354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -506,27 +516,3 @@ MonoBehaviour:
   currentWallSurfaceData: {fileID: 0}
   wallSurfaceType: 0
   groundContacts: 0
---- !u!114 &-3226751475885002246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a08d2ebf8edb2a14485cd9b55fb686bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerItems
-  maxOwnedAbilities: 3
-  replaceOldestWhenFull: 1
-  m_Script: {fileID: 11500000, guid: f9cec88cb9dd3694a92527933113c82c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerColorPicker
-  ShowTopMostFoldoutHeaderGroup: 1
-  ballRenderer: {fileID: 2558198393808217373}
-  ColorIndex:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: -1

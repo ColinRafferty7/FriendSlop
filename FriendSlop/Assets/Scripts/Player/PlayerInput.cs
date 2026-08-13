@@ -17,7 +17,7 @@ public class PlayerInput : NetworkBehaviour
         base.OnNetworkSpawn();
         if (!IsOwner && !IsServer) Destroy(this);
     }
-
+    
     private void Update()
     {
         if (!IsOwner) return;
