@@ -21,8 +21,7 @@ public class SurfaceController : MonoBehaviour
 
     public bool wallContact { get; private set; }
     public Vector3 wallNormal { get; private set; } = Vector3.zero;
-
-    // Accumulated across all OnCollisionStay calls since the last ResolveGroundState()
+ 
     Vector3 pendingFloorNormalSum = Vector3.zero;
     int pendingFloorContactCount = 0;
     bool pendingFloorContact = false;
@@ -84,9 +83,6 @@ public class SurfaceController : MonoBehaviour
         }
     }
 
-    // Called once per fixed-timestep physics step, from PlayerPhysics.FixedUpdate,
-    // BEFORE PhysicsCalculations reads groundContacts/wallContact. Tied to the physics
-    // cadence instead of render cadence to avoid frame-rate mismatch flicker.
     public void ResolveGroundState()
     {
         groundContacts = pendingFloorContact;
@@ -142,9 +138,6 @@ public class SurfaceController : MonoBehaviour
                     currentWallSurfaceData = null;
                 }
             }
-            // default(SurfaceType) rather than a named member, since we only ever branch
-            // on "is this Sticky or not" — any non-sticky value (including no data found)
-            // falls through to the same non-sticky wall behavior.
             wallSurfaceType = currentWallSurfaceData != null ? currentWallSurfaceData.surfaceType : default;
         }
         else

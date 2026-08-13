@@ -15,6 +15,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float maxAngularVelocity = 1f;
     [SerializeField] private float linearFriction = 1f;
     [SerializeField] private float angularFriction = 1f;
+    [SerializeField] private float gravityMultiplier = 1f;
     #endregion
 
     #region ========== Ball Related Stats ===============
@@ -57,6 +58,11 @@ public class PlayerStats : MonoBehaviour
     public float GetTorque()
     {
         return torqueMultiplier * baseTorque;
+    }
+
+    public float GetGravityMultiplier()
+    {
+        return gravityMultiplier;
     }
 
     public float GetMaxAngularVelocity()
