@@ -33,7 +33,6 @@ public class ColorPickerZone : MonoBehaviour
 
     private bool IsLocalPlayer(Collider other)
     {
-
         NetworkObject netObj = other.GetComponentInParent<NetworkObject>();
         return netObj != null && netObj.IsOwner;
     }
