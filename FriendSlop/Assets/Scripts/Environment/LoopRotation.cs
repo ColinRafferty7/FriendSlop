@@ -33,11 +33,11 @@ public class LoopRotation : NetworkBehaviour
             delta
         );
 
-        transform.rotation = Quaternion.Euler(
-            startingRotation.eulerAngles.x,
-            transform.eulerAngles.y,
-            startingRotation.eulerAngles.z
-        );
+        //transform.rotation = Quaternion.Euler(
+        //    startingRotation.eulerAngles.x,
+        //    transform.eulerAngles.y,
+        //    startingRotation.eulerAngles.z
+        //);
 
 
         if (!returning && currentAngle >= angleOfRotation)

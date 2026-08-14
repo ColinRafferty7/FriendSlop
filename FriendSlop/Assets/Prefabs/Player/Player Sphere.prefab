@@ -405,17 +405,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPhysics
   ShowTopMostFoldoutHeaderGroup: 1
-  groundContacts:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
   airControl: 0.5
-  torqueAmount: 5
   maxHorizontalSpeed: 5
-  MAX_VERTICAL_SPEED: 50
+  maxVerticalSpeed: 50
   maxAngularVelocity: 20
-  platformCatchUpRate: 1000
+  climbTaperStartFraction: 0.75
+  inputSmoothTime: 0.01
 --- !u!114 &1248577132122868044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,12 +423,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbe4ff844589bb4fab873aa83393a0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  baseSpeed: 5
-  baseJumpForce: 5
+  baseSpeed: 9
+  baseJumpForce: 6
   baseTorque: 5
   maxAngularVelocity: 1
   linearFriction: 1
   angularFriction: 1
+  gravityMultiplier: 1
 --- !u!114 &1136580623981733630
 MonoBehaviour:
   m_ObjectHideFlags: 0

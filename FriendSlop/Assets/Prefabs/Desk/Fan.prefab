@@ -338,6 +338,7 @@ GameObject:
   - component: {fileID: 6137528261224994314}
   - component: {fileID: 9118636430025795727}
   - component: {fileID: 1045783507363100080}
+  - component: {fileID: 3858537598244350871}
   m_Layer: 0
   m_Name: Blades
   m_TagString: Untagged
@@ -459,6 +460,19 @@ MonoBehaviour:
   pivotPoint: {fileID: 963738528825445430}
   speed: 20
   angleOfRotation: 90
+--- !u!114 &3858537598244350871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3735412690102827887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 856cd4852146a2c42b28ef1e0fad24d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BladeRotation
+  speed: 1
 --- !u!1 &4323633643939182331
 GameObject:
   m_ObjectHideFlags: 0

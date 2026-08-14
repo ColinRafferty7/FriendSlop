@@ -8,7 +8,7 @@ public class FanPushing : MonoBehaviour
     {
         if (other.TryGetComponent<PlayerPhysics>(out PlayerPhysics physics))
         {
-            physics.ApplyForce(force * transform.forward);
+            physics.AddForce(force * transform.forward);
         }
     }
 }
