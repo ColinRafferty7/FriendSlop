@@ -46,6 +46,7 @@ public class MainMenu : MonoBehaviour
             );
 
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            GUIUtility.systemCopyBuffer = joinCode;
 
             bool started = NetworkManager.Singleton.StartHost();
 

@@ -1211,7 +1211,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1607216183442221373, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
       propertyPath: NetworkConfig.TickRate
-      value: 90
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 3352776415930217674, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
       propertyPath: m_Name
@@ -1266,8 +1266,20 @@ PrefabInstance:
       value: 40.72
       objectReference: {fileID: 0}
     - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
+      propertyPath: m_ProtocolType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
+      propertyPath: m_UseEncryption
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
+      propertyPath: m_UseWebSockets
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824717650786479996, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}
       propertyPath: ConnectionData.ServerListenAddress
-      value: 0.0.0.0
+      value: 127.0.0.1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8303473981314633228, guid: 42c9df4ad2c74c64b898c3e5ae075186, type: 3}

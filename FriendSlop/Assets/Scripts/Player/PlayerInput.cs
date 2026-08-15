@@ -17,16 +17,16 @@ public class PlayerInput : NetworkBehaviour
         base.OnNetworkSpawn();
         if (!IsOwner && !IsServer) Destroy(this);
     }
-    
+
     private void Update()
     {
         if (!IsOwner) return;
 
-        ReadMovementDir();
+        //ReadMovementDir();
 
         ReadJumpInput();
 
-        ReadItemInputs();
+        //ReadItemInputs();
     }
 
     private void ReadMovementDir()
@@ -36,7 +36,7 @@ public class PlayerInput : NetworkBehaviour
 
         Vector3 deltaDir = CameraTarget.GetCameraRelativeInputDirection(h, v);
 
-        ApplyMovementDirRpc(deltaDir);
+        //ApplyMovementDirRpc(deltaDir);
     }
 
     [Rpc(SendTo.Server)]
@@ -49,7 +49,7 @@ public class PlayerInput : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("Space Pressed: " + Time.realtimeSinceStartup);
+            Debug.Log($"SEND: {Time.realtimeSinceStartup:F4}");
             ApplyJumpRpc();
         }
     }
@@ -57,7 +57,7 @@ public class PlayerInput : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void ApplyJumpRpc()
     {
-        RoundManager.Instance.LogRpc("ApplyJumpRpc: " + Time.realtimeSinceStartup);
+        Debug.Log($"RECEIVE: {Time.realtimeSinceStartup:F4}");
         physics.ApplyJumpForce();
     }
 

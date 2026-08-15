@@ -73,8 +73,7 @@ public class PlayerPhysics : NetworkBehaviour
     public void ApplyJumpForce()
     {
         if (!surfaceController.groundContacts) return;
-
-        RoundManager.Instance.LogRpc(Time.realtimeSinceStartup.ToString());
+        RoundManager.Instance.LogRpc("Physics Jump: " + NetworkManager.Singleton.ServerTime.Time);
         AddForce(Vector3.up * stats.GetJumpForce(), ForceMode.Impulse);
     }
 
