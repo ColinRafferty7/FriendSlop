@@ -11,7 +11,7 @@ public class RoundManager : NetworkBehaviour
 {
     public static RoundManager Instance { get; private set; }
     private List<RoundParticipant> Players = new List<RoundParticipant>();
-    [SerializeField] SpawnData spawns;
+    [SerializeField] private SpawnData spawns;
     public NetworkVariable<RoundState> CurrentState;
     public NetworkVariable<int> Countdown = new();
     public NetworkVariable<bool> UIactive = new();
@@ -52,6 +52,7 @@ public class RoundManager : NetworkBehaviour
         if (IsLobby)
         {
             SpawnAllPlayers();
+            ActivateAllPlayers();
             CurrentState.Value = RoundState.Playing;
             return;
         }
@@ -62,6 +63,12 @@ public class RoundManager : NetworkBehaviour
     {
         Countdown.OnValueChanged += OnCountdownChanged;
         UIactive.OnValueChanged += OnActiveChanged;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void LogRpc(string message)
+    {
+        Debug.Log(message);
     }
 
     private void OnActiveChanged(bool previous, bool current)
@@ -117,9 +124,9 @@ public class RoundManager : NetworkBehaviour
         AlivePlayers = 0;
 
         DespawnAllPlayers();
-
-        yield return StartCoroutine(StartTimer(3));
         AlivePlayers += SpawnAllPlayers();
+        yield return StartCoroutine(StartTimer(3));
+        ActivateAllPlayers();
         
         CurrentState.Value = RoundState.Playing;
     }
@@ -127,12 +134,27 @@ public class RoundManager : NetworkBehaviour
     private int SpawnAllPlayers()
     {
         int count = 0;
+        List<Vector3> spawnPoints = new List<Vector3>();
         foreach (RoundParticipant player in Players)
         {
-            player.ResetForRound(spawns.GetRandomSpawnPoint());
+            Vector3 spawn;
+            do { spawn = spawns.GetRandomSpawnPoint(); }
+            while (spawnPoints.Contains(spawn));
+            
+            spawnPoints.Add(spawn);
+            player.ResetForRound(spawn);
+            player.State.Value = PlayerState.Uncontrollable;
             count++;
         }
         return count;
+    }
+
+    private void ActivateAllPlayers()
+    {
+        foreach (RoundParticipant player in Players)
+        {
+            player.State.Value = PlayerState.Alive;
+        }
     }
 
     public void PlayerEliminated(RoundParticipant player)
@@ -162,7 +184,7 @@ public class RoundManager : NetworkBehaviour
         }
         else
         {
-            RoundParticipant winner = Players.FirstOrDefault(player => player.IsAlive.Value);
+            RoundParticipant winner = Players.FirstOrDefault(player => player.State.Value == PlayerState.Alive);
 
             message = $"Player #{winner.OwnerClientId} Wins!";
         }

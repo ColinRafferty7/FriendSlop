@@ -690,11 +690,11 @@ PlayerSettings:
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
   enableDirectStorage: 0
-  cloudProjectId: 78bd0635-732c-4c5c-b2a0-5a8726ccfdd5
+  cloudProjectId: d8a5d4b6-4160-416e-9276-8e3046139b8a
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: FriendSlop
-  organizationId: thesimplefarmer7
+  organizationId: colinrafferty705
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

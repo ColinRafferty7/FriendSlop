@@ -1,17 +1,18 @@
 using Unity.VectorGraphics;
 using UnityEngine;
+using System.Collections.Generic;
 
 
 [CreateAssetMenu(fileName = "SpawnData", menuName = "Maps/SpawnData")]
 public class SpawnData : ScriptableObject
 {
     public string MapName;
-    public Vector3[] SpawnPoints;
+    public List<Vector3> SpawnPoints = new List<Vector3>();
 
     public Vector3 GetRandomSpawnPoint()
     {
-        if (SpawnPoints.Length == 0) return Vector3.zero;
+        if (SpawnPoints.Count == 0) return Vector3.zero;
 
-        else return SpawnPoints[Random.Range(0, SpawnPoints.Length)];
+        else return SpawnPoints[Random.Range(0, SpawnPoints.Count)];
     }
 }

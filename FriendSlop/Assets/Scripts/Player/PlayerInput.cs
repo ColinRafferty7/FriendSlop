@@ -49,6 +49,7 @@ public class PlayerInput : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("Space Pressed: " + Time.realtimeSinceStartup);
             ApplyJumpRpc();
         }
     }
@@ -56,6 +57,7 @@ public class PlayerInput : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void ApplyJumpRpc()
     {
+        RoundManager.Instance.LogRpc("ApplyJumpRpc: " + Time.realtimeSinceStartup);
         physics.ApplyJumpForce();
     }
 

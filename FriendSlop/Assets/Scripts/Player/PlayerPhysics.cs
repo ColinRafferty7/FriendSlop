@@ -74,6 +74,7 @@ public class PlayerPhysics : NetworkBehaviour
     {
         if (!surfaceController.groundContacts) return;
 
+        RoundManager.Instance.LogRpc(Time.realtimeSinceStartup.ToString());
         AddForce(Vector3.up * stats.GetJumpForce(), ForceMode.Impulse);
     }
 

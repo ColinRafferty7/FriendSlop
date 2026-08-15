@@ -2,34 +2,45 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public enum PlayerState
+{
+    Alive,
+    Uncontrollable,
+    Dead
+}
+
 public class RoundParticipant : NetworkBehaviour
 {
     private Rigidbody rb;
     private MeshRenderer mesh;
     private SphereCollider col;
-    [SerializeField] private GameObject frontIndicator;
+    private PlayerInput input;
 
     [SerializeField] private bool debug;
 
-    public NetworkVariable<bool> IsAlive = new(true);
     public NetworkVariable<int> Score = new(0);
+    public NetworkVariable<PlayerState> State = new(PlayerState.Alive);
+
+
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        mesh = GetComponent<MeshRenderer>();
+        mesh = GetComponent<MeshRenderer>(); 
         col = GetComponent<SphereCollider>();
+        input = GetComponent<PlayerInput>();
 
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        IsAlive.OnValueChanged += OnAliveChanged;
+        State.OnValueChanged += OnStateChanged;
     }
 
     private void Update()
     {
+        if (!IsServer) return;
         if (rb.position.y < -10f)
         {
-            ResetForRound(Vector3.zero);
+            Eliminate();
         }
     }
 
@@ -43,24 +54,46 @@ public class RoundParticipant : NetworkBehaviour
         }
     }
 
+    private void OnStateChanged(PlayerState prev, PlayerState current)
+    {
+        Debug.Log("State Change: " + current);
+        switch (current)
+        {
+            case PlayerState.Alive:
+                mesh.enabled = true;
+                col.enabled = true;
+                input.enabled = true;
+                break;
+            case PlayerState.Uncontrollable:
+                mesh.enabled = true;
+                col.enabled = true;
+                input.enabled = false;
+                break;
+            case PlayerState.Dead:
+                mesh.enabled = false;
+                col.enabled = false;
+                input.enabled = false;
+                break;
+        }
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        if (IsServer && !debug)
-        {
-            IsAlive.Value = false;
-        }
+        if (!IsOwner && !IsServer) Destroy(this);
 
-        OnAliveChanged(false, IsAlive.Value);
+        State.Value = PlayerState.Alive;
+        OnStateChanged(0, State.Value);
     }
 
     public void Eliminate()
     {
+        Debug.Log("Eliminate");
         if (!IsServer)
             return;
 
-        IsAlive.Value = false;
+        State.Value = PlayerState.Dead;
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -79,25 +112,18 @@ public class RoundParticipant : NetworkBehaviour
         if (!IsServer)
             return;
 
+        State.Value = PlayerState.Alive;
+
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
         rb.position = spawnPoint;
         rb.rotation = Quaternion.identity;
-
-        IsAlive.Value = true;
     }
 
     [Rpc(SendTo.Server)]
     public void ResetForRoundRpc(Vector3 spawnPoint)
     {
         ResetForRound(spawnPoint);
-    }
-
-    private void OnAliveChanged(bool prev, bool current)
-    {
-        mesh.enabled = current;
-        col.enabled = current;
-        frontIndicator.gameObject.SetActive(current);
     }
 }

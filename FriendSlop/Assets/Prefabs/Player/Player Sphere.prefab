@@ -127,16 +127,15 @@ GameObject:
   - component: {fileID: 4579209932181427402}
   - component: {fileID: -3392162865559732308}
   - component: {fileID: 5115585262971362756}
-  - component: {fileID: -4645308801868793636}
   - component: {fileID: 8547092889924936427}
   - component: {fileID: 4779545412464256078}
   - component: {fileID: 2519531917112835968}
   - component: {fileID: 1248577132122868044}
   - component: {fileID: 1136580623981733630}
-  - component: {fileID: 6518768909105953462}
   - component: {fileID: -8478353992886602366}
   - component: {fileID: -3226751475885002246}
   - component: {fileID: 4204856728868956354}
+  - component: {fileID: 6518768909105953462}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -335,25 +334,8 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 0
+  Interpolate: 1
   SlerpPosition: 0
---- !u!114 &-4645308801868793636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
-  AutoUpdateKinematicState: 1
-  AutoSetKinematicOnDespawn: 1
 --- !u!114 &8547092889924936427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -367,7 +349,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundParticipant
   ShowTopMostFoldoutHeaderGroup: 1
-  frontIndicator: {fileID: 1990780518308171158}
   debug: 0
   IsAlive:
     UpdateTraits:
@@ -423,7 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbe4ff844589bb4fab873aa83393a0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  baseSpeed: 9
+  baseSpeed: 11
   baseJumpForce: 6
   baseTorque: 5
   maxAngularVelocity: 1
@@ -443,27 +424,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &6518768909105953462
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9840cec76c0ccac4f8719dcea759a4d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
-  ShowTopMostFoldoutHeaderGroup: 1
-  componentMode: 1
-  componentList:
-  - {fileID: 2519531917112835968}
-  - {fileID: 8547092889924936427}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 1248577132122868044}
-  - {fileID: 1136580623981733630}
 --- !u!114 &-8478353992886602366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -512,3 +472,23 @@ MonoBehaviour:
   currentWallSurfaceData: {fileID: 0}
   wallSurfaceType: 0
   groundContacts: 0
+--- !u!114 &6518768909105953462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9840cec76c0ccac4f8719dcea759a4d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  componentMode: 1
+  componentList:
+  - {fileID: 2519531917112835968}
+  - {fileID: 1248577132122868044}
+  - {fileID: 4204856728868956354}
+  - {fileID: -8478353992886602366}
+  - {fileID: -3226751475885002246}
