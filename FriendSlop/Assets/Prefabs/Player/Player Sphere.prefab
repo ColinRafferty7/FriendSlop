@@ -334,7 +334,7 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
+  Interpolate: 0
   SlerpPosition: 0
 --- !u!114 &8547092889924936427
 MonoBehaviour:
@@ -350,12 +350,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoundParticipant
   ShowTopMostFoldoutHeaderGroup: 1
   debug: 0
-  IsAlive:
+  Score:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 1
-  Score:
+    m_InternalValue: 0
+  State:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0

@@ -89,10 +89,14 @@ public class RoundParticipant : NetworkBehaviour
 
     public void Eliminate()
     {
-        Debug.Log("Eliminate");
         if (!IsServer)
             return;
 
+        if (RoundManager.Instance.Debug) 
+        {
+            ResetForRound(Vector3.zero);
+            return;
+        }
         State.Value = PlayerState.Dead;
 
         rb.linearVelocity = Vector3.zero;

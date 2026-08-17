@@ -19,6 +19,7 @@ public class RoundManager : NetworkBehaviour
     public bool IsLobby = false;
 
     [SerializeField] private Text countdownText;
+    [SerializeField] public bool Debug;
 
     public float AlivePlayers;
 
@@ -65,12 +66,6 @@ public class RoundManager : NetworkBehaviour
         UIactive.OnValueChanged += OnActiveChanged;
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    public void LogRpc(string message)
-    {
-        Debug.Log(message);
-    }
-
     private void OnActiveChanged(bool previous, bool current)
     {
         countdownText.gameObject.SetActive(current);
@@ -108,7 +103,6 @@ public class RoundManager : NetworkBehaviour
         if (Players.Contains(player)) return;
         Players.Add(player);
         if (!IsLobby) player.Eliminate();
-        Debug.Log("Player Spawn: " + player.OwnerClientId);
     }
 
     private void DespawnAllPlayers()

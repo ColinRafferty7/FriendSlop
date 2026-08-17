@@ -22,11 +22,11 @@ public class PlayerInput : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        //ReadMovementDir();
+        ReadMovementDir();
 
         ReadJumpInput();
 
-        //ReadItemInputs();
+        ReadItemInputs();
     }
 
     private void ReadMovementDir()
@@ -36,7 +36,7 @@ public class PlayerInput : NetworkBehaviour
 
         Vector3 deltaDir = CameraTarget.GetCameraRelativeInputDirection(h, v);
 
-        //ApplyMovementDirRpc(deltaDir);
+        ApplyMovementDirRpc(deltaDir);
     }
 
     [Rpc(SendTo.Server)]
