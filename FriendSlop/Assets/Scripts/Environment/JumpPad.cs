@@ -4,6 +4,12 @@ using UnityEngine;
 public class JumpPad : NetworkBehaviour
 {
     [SerializeField] float jumpForce = 15f;
+    Animator anim;
+
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -18,5 +24,7 @@ public class JumpPad : NetworkBehaviour
         Vector3 velocity = rb.linearVelocity;
         velocity.y = jumpForce;
         rb.linearVelocity = velocity;
+
+        anim.SetTrigger("Jump");
     }
 }

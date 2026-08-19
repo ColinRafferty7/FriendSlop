@@ -13,6 +13,7 @@ using UnityEditor;
 // 6. Delete all of the temp game objects
 public class SpawnPointCreator : MonoBehaviour
 {
+#if UNITY_EDITOR
     [SerializeField] private string mapName;
     [SerializeField] private GameObject[] spawnPoints;
     private void Start()
@@ -28,4 +29,5 @@ public class SpawnPointCreator : MonoBehaviour
         AssetDatabase.CreateAsset(spawns, $"Assets/MapObjects/Spawner/{mapName}.asset");
         AssetDatabase.SaveAssets();
     }
+#endif
 }
