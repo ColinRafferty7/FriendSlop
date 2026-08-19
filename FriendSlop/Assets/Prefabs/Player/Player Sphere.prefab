@@ -131,11 +131,11 @@ GameObject:
   - component: {fileID: 4779545412464256078}
   - component: {fileID: 2519531917112835968}
   - component: {fileID: 1248577132122868044}
-  - component: {fileID: 1136580623981733630}
   - component: {fileID: -8478353992886602366}
   - component: {fileID: -3226751475885002246}
   - component: {fileID: 4204856728868956354}
   - component: {fileID: 6518768909105953462}
+  - component: {fileID: 2528484650656834439}
   m_Layer: 0
   m_Name: Player Sphere
   m_TagString: Untagged
@@ -282,7 +282,7 @@ MonoBehaviour:
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  <InScenePlaced>k__BackingField: 0
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
@@ -309,24 +309,24 @@ MonoBehaviour:
   RotationInterpolationType: 0
   ScaleInterpolationType: 0
   PositionLerpSmoothing: 1
-  PositionMaxInterpolationTime: 0.025
+  PositionMaxInterpolationTime: 0.1
   RotationLerpSmoothing: 1
   RotationMaxInterpolationTime: 0.1
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
   AuthorityMode: 0
   TickSyncChildren: 0
-  UseUnreliableDeltas: 0
+  UseUnreliableDeltas: 1
   SyncPositionX: 1
   SyncPositionY: 1
   SyncPositionZ: 1
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
-  SyncScaleX: 1
-  SyncScaleY: 1
-  SyncScaleZ: 1
-  PositionThreshold: 0.001
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.00001
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
   UseQuaternionSynchronization: 0
@@ -411,19 +411,6 @@ MonoBehaviour:
   linearFriction: 1
   angularFriction: 1
   gravityMultiplier: 1
---- !u!114 &1136580623981733630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6126187246611128173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &-8478353992886602366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,3 +479,16 @@ MonoBehaviour:
   - {fileID: 4204856728868956354}
   - {fileID: -8478353992886602366}
   - {fileID: -3226751475885002246}
+--- !u!114 &2528484650656834439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6126187246611128173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5651445656512964d9f731093de295f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkUpdateMonitor
+  ShowTopMostFoldoutHeaderGroup: 1

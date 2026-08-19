@@ -23,6 +23,7 @@ public class MainMenu : MonoBehaviour
         string code = await StartHostWithRelay();
         Debug.Log(code);
         codeText.text = "Code: " + code;
+        Debug.Log(NetworkManager.Singleton.SceneManager);
         NetworkManager.Singleton.SceneManager.LoadScene(gamename, LoadSceneMode.Single);
     }
 

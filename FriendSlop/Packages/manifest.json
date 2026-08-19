@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.community.netcode.transport.enet": "https://github.com/Unity-Technologies/multiplayer-community-contributions.git?path=/Transports/com.community.netcode.transport.enet",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.ai.navigation": "2.0.13",
@@ -12,7 +13,7 @@
     "com.unity.microsoft.gdk.tools": "1.6.0",
     "com.unity.multiplayer.center": "1.0.1",
     "com.unity.multiplayer.playmode": "2.0.2",
-    "com.unity.netcode.gameobjects": "2.13.0",
+    "com.unity.netcode.gameobjects": "2.13.1",
     "com.unity.probuilder": "6.1.2",
     "com.unity.purchasing": "5.4.1",
     "com.unity.render-pipelines.universal": "17.5.0",

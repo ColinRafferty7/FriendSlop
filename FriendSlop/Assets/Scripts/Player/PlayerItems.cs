@@ -22,7 +22,6 @@ public class PlayerItems : MonoBehaviour
         if (currentAbility != null && cooldownTimer <= 0f &&
             (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
-            Debug.Log("Activating " + gameObject);
             currentAbility.Activate(gameObject);
             cooldownTimer = currentAbility.Cooldown;
         }
@@ -59,7 +58,6 @@ public class PlayerItems : MonoBehaviour
         currentAbility = ownedAbilities[index];
         cooldownTimer = 0f;
         currentAbility.OnEquip(gameObject);
-        Debug.Log("Equipped: " + currentAbility.GetType().Name);
     }
     public void SwapAbility(int direction)
     {

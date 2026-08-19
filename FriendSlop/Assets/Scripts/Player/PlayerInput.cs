@@ -49,7 +49,6 @@ public class PlayerInput : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log($"SEND: {Time.realtimeSinceStartup:F4}");
             ApplyJumpRpc();
         }
     }
@@ -57,7 +56,6 @@ public class PlayerInput : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void ApplyJumpRpc()
     {
-        Debug.Log($"RECEIVE: {Time.realtimeSinceStartup:F4}");
         physics.ApplyJumpForce();
     }
 

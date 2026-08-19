@@ -133,7 +133,6 @@ public class BallController : NetworkBehaviour
         speed = baseSpeed * speedMult;
         jumpForce = baseJumpForce * jumpMult;
         maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
-        Debug.Log(speed);
         transform.localScale = baseScale * sizeMult;
         rb.mass = baseMass * sizeMult;
         RecalculateRadius();

@@ -4,7 +4,7 @@ using Unity.Netcode;
 
 
 [RequireComponent(typeof(Camera))]
-public class DynamicCameraController : NetworkBehaviour
+public class DynamicCameraController : MonoBehaviour
 {
     public static DynamicCameraController Instance { get; private set; }
 
@@ -66,8 +66,6 @@ public class DynamicCameraController : NetworkBehaviour
 
     private void LateUpdate()
     {
-        if (!IsServer) return;
-        
         targets.RemoveAll(t => t == null);
 
         if (targets.Count == 0) return;

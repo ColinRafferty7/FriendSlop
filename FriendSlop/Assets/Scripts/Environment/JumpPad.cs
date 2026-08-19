@@ -25,6 +25,12 @@ public class JumpPad : NetworkBehaviour
         velocity.y = jumpForce;
         rb.linearVelocity = velocity;
 
+        StartAnimationRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void StartAnimationRpc()
+    {
         anim.SetTrigger("Jump");
     }
 }

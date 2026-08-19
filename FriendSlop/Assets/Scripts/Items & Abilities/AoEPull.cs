@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class AoePull : AbilityBase
 {
@@ -10,10 +11,13 @@ public class AoePull : AbilityBase
     public override void Activate(GameObject user)
     {
         Collider[] hits = Physics.OverlapSphere(user.transform.position, pullRadius);
+        List<Rigidbody> rbs = new List<Rigidbody>();
         foreach (var hit in hits)
         {
             if (hit.attachedRigidbody != null && hit.gameObject != user)
             {
+                if (rbs.Contains(hit.attachedRigidbody)) continue;
+
                 Vector3 dir = (user.transform.position - hit.transform.position);
                 Vector3 upForce = new (0f, upwardForce, 0f);
                 dir.y = 0;
@@ -21,6 +25,8 @@ public class AoePull : AbilityBase
                 upForce = (upForce.normalized * 0.5f).normalized;
                 dir.y = upForce.y;
                 hit.attachedRigidbody.AddForce(dir * pullForce, ForceMode.Impulse);
+
+                rbs.Add(hit.attachedRigidbody);
             }
         }
     }

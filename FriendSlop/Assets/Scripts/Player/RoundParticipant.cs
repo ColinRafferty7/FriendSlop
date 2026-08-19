@@ -56,7 +56,6 @@ public class RoundParticipant : NetworkBehaviour
 
     private void OnStateChanged(PlayerState prev, PlayerState current)
     {
-        Debug.Log("State Change: " + current);
         switch (current)
         {
             case PlayerState.Alive:

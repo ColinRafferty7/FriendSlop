@@ -150,12 +150,12 @@ MonoBehaviour:
     SourceHashToOverride: 0
     OverridingTargetPrefab: {fileID: 0}
   - Override: 0
-    Prefab: {fileID: 7481352564424886332, guid: 768419b2374cf0c499bf0357ff027ae2, type: 3}
+    Prefab: {fileID: 8539441937720284363, guid: 59751fc06dcbb034080d0f100566c06c, type: 3}
     SourcePrefabToOverride: {fileID: 0}
     SourceHashToOverride: 0
     OverridingTargetPrefab: {fileID: 0}
   - Override: 0
-    Prefab: {fileID: 2636661822413425184, guid: 59751fc06dcbb034080d0f100566c06c, type: 3}
+    Prefab: {fileID: 7618847656733535185, guid: db161376fb177c24ba4cce846284f945, type: 3}
     SourcePrefabToOverride: {fileID: 0}
     SourceHashToOverride: 0
     OverridingTargetPrefab: {fileID: 0}
