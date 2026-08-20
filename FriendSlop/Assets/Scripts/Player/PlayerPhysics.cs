@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEditor.U2D;
 
 public class PlayerPhysics : NetworkBehaviour
 {
@@ -12,7 +13,6 @@ public class PlayerPhysics : NetworkBehaviour
 
     #region ========== Physics calculation values =======
     [SerializeField] float airControl = 0.5f;
-    [SerializeField] float maxHorizontalSpeed = 5f;
     [SerializeField] float maxVerticalSpeed = 50f;
     [SerializeField] float maxAngularVelocity = 1f;
     //Percentage of max climbable angle at which the helper force starts tapering off significantly(basically you stop being able to climb)
@@ -221,7 +221,7 @@ public class PlayerPhysics : NetworkBehaviour
 
         Vector3 horizontal = new Vector3(velocity.x, 0, velocity.z);
         float horizontalExternalMag = new Vector3(externalVelocity.x, 0, externalVelocity.z).magnitude;
-        float effectiveHorizontalCap = maxHorizontalSpeed + horizontalExternalMag;
+        float effectiveHorizontalCap = stats.GetMaxSpeed() + horizontalExternalMag;
 
         bool horizontalClamped = horizontal.magnitude > effectiveHorizontalCap;
         if (horizontalClamped)

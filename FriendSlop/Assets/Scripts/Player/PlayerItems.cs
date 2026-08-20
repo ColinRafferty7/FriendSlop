@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static BallController;
 public class PlayerItems : MonoBehaviour
 {
     [SerializeField] int maxOwnedAbilities = 3;
@@ -64,5 +65,62 @@ public class PlayerItems : MonoBehaviour
         if (ownedAbilities.Count == 0) return;
         int newIndex = (currentAbilityIndex + direction + ownedAbilities.Count) % ownedAbilities.Count;
         EquipByIndex(newIndex);
+    }
+
+    public static GameObject FindClosestTargetInFront(Transform transform, float searchRadius)
+    {
+        Collider[] candidates = Physics.OverlapSphere(transform.position, searchRadius);
+
+        GameObject closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var col in candidates)
+        {
+            if (col.attachedRigidbody == null) continue;
+
+            Vector3 toTarget = col.transform.position - transform.position;
+            toTarget.y = 0;
+
+            if (toTarget.magnitude < 0.01f) continue;
+
+            Vector3 dirToTarget = toTarget.normalized;
+            float dot = Vector3.Dot(transform.forward, dirToTarget);
+
+            if (dot > 0f)
+            {
+                float dist = toTarget.magnitude;
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closest = col.gameObject;
+                }
+            }
+        }
+        return closest;
+    }
+
+    public static GameObject ClosestTarget(Transform transform, float radius)
+    {
+        Collider[] candidates = Physics.OverlapSphere(transform.position, radius);
+
+        GameObject closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var col in candidates)
+        {
+            if (col.attachedRigidbody == null) continue;
+
+            Vector3 toTarget = col.transform.position - transform.position;
+            toTarget.y = 0;
+
+            if (toTarget.magnitude < 0.01f) continue;
+
+            if (toTarget.magnitude < closestDist)
+            {
+                closestDist = toTarget.magnitude;
+                closest = col.gameObject;
+            }
+        }
+        return closest;
     }
 }

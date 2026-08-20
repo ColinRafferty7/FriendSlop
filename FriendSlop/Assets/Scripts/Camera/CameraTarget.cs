@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CameraTarget : NetworkBehaviour
 {
@@ -9,6 +10,13 @@ public class CameraTarget : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         registerCoroutine = StartCoroutine(RegisterWhenReady());
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        StartCoroutine(RegisterWhenReady());
     }
 
     public override void OnNetworkDespawn()

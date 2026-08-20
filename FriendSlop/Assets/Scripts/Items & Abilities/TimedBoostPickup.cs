@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.VisualScripting.Dependencies.NCalc;
 
 public class TimedBoostPickup : NetworkBehaviour
 {
@@ -11,10 +12,9 @@ public class TimedBoostPickup : NetworkBehaviour
     {
         if (!IsServer) return; 
 
-        BallController ball = other.GetComponent<BallController>();
-        if (ball != null)
+        if (other.TryGetComponent<PlayerStats>(out PlayerStats stats))
         {
-            ball.ApplyTimedBoost(statType, multiplier, duration); 
+            stats.ActivateBoost(statType, multiplier, duration); 
             NetworkObject.Despawn(); 
         }
     }

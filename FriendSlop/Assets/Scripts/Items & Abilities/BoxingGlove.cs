@@ -11,10 +11,7 @@ public class BoxingGlove : AbilityBase
 
     public override void Activate(GameObject user)
     {
-        BallController ball = user.GetComponent<BallController>();
-        if (ball == null || glovePrefab == null) return;
-
-        GameObject target = ball.FindClosestTargetInFront(range);
+        GameObject target = PlayerItems.ClosestTarget(user.transform, range);
 
         Vector3 direction;
         if (target != null)
@@ -25,11 +22,12 @@ public class BoxingGlove : AbilityBase
         }
         else
         {
-            direction = ball.Front;
+            return;
+            //direction = user.transform.forward;
         }
 
         GameObject gloveObj = Instantiate(glovePrefab, user.transform.position, Quaternion.LookRotation(direction, Vector3.up));
         GloveProjectile glove = gloveObj.GetComponent<GloveProjectile>();
-        glove.Init(user, direction, pushForce, range, speed, ball.BallRadius, spawnOffsetMultiplier);
+        glove.Init(user, direction, pushForce, range, speed, 1f, spawnOffsetMultiplier);
     }
 }
