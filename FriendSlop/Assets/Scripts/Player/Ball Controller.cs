@@ -5,7 +5,7 @@ using Unity.Netcode;
 
 
 
-public enum StatType { Speed, JumpForce, Size }
+//public enum StatType { Speed, JumpForce, Size }
 
 [System.Serializable]
 
@@ -28,7 +28,7 @@ public class BallController : NetworkBehaviour
     [SerializeField] int maxOwnedAbilities = 3;
     [SerializeField] bool replaceOldestWhenFull = true;
     float ballRadius;
-    List<ActiveBoost> activeBoosts = new List<ActiveBoost>();
+    //List<//activeboost> //activeboosts = new List<//activeboost>();
     public float BallRadius => ballRadius;
     Vector3 deltaDir;
     [SerializeField] Transform frontIndicator;
@@ -80,80 +80,80 @@ public class BallController : NetworkBehaviour
     int swapPressed = 0;
     Vector3 baseScale;
 
-    [System.Serializable]
-    public class ActiveBoost
-    {
-        public StatType statType;
-        public float multiplier;
-        public float remainingTime;
-    }
+    //[System.Serializable]
+    //public class //activeboost
+    //{
+    //    public StatType statType;
+    //    public float multiplier;
+    //    public float remainingTime;
+    //}
 
-    [Rpc(SendTo.Server)]
-    public void RequestApplyTimedBoostRpc(StatType statType, float multiplier, float duration)
-    {
-        ApplyTimedBoost(statType, multiplier, duration);
-    }
+    //[Rpc(SendTo.Server)]
+    //public void RequestApplyTimedBoostRpc(StatType statType, float multiplier, float duration)
+    //{
+    //    ApplyTimedBoost(statType, multiplier, duration);
+    //}
 
-    public void ApplyTimedBoost(StatType statType, float multiplier, float duration)
-    {
-        ActiveBoost existing = activeBoosts.Find(b => b.statType == statType);
+    //public void ApplyTimedBoost(StatType statType, float multiplier, float duration)
+    //{
+    //    //activeboost existing = //activeboosts.Find(b => b.statType == statType);
 
-        if (existing != null)
-        {
-            existing.remainingTime = duration;
-        }
-        else
-        {
-            activeBoosts.Add(new ActiveBoost { statType = statType, multiplier = multiplier, remainingTime = duration });
-        }
+    //    if (existing != null)
+    //    {
+    //        existing.remainingTime = duration;
+    //    }
+    //    else
+    //    {
+    //        //activeboosts.Add(new //activeboost { statType = statType, multiplier = multiplier, remainingTime = duration });
+    //    }
 
-        RecalculateStats();
-    }
+    //    RecalculateStats();
+    //}
 
 
-    void RecalculateStats()
-    {
-        float speedMult = 1f, jumpMult = 1f, maxSpeedMult = 1f, sizeMult = 1f;
+    //void RecalculateStats()
+    //{
+    //    float speedMult = 1f, jumpMult = 1f, maxSpeedMult = 1f, sizeMult = 1f;
 
-        foreach (var boost in activeBoosts)
-        {
-            switch (boost.statType)
-            {
-                case StatType.Speed:
-                    speedMult *= boost.multiplier;
-                    maxSpeedMult *= boost.multiplier;
-                    break;
-                case StatType.JumpForce: jumpMult *= boost.multiplier; break;
-                case StatType.Size:
-                    sizeMult *= boost.multiplier;
-                    break;
-            }
-        }
+    //    foreach (var boost in //activeboosts)
+    //    {
+    //        switch (boost.statType)
+    //        {
+    //            case StatType.Speed:
+    //                speedMult *= boost.multiplier;
+    //                maxSpeedMult *= boost.multiplier;
+    //                break;
+    //            case StatType.JumpForce: jumpMult *= boost.multiplier; break;
+    //            case StatType.Size:
+    //                sizeMult *= boost.multiplier;
+    //                break;
+    //        }
+    //    }
 
-        speed = baseSpeed * speedMult;
-        jumpForce = baseJumpForce * jumpMult;
-        maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
-        Debug.Log(speed);
-        transform.localScale = baseScale * sizeMult;
-        rb.mass = baseMass * sizeMult;
-        RecalculateRadius();
-    }
-    void TickBoosts(float deltaTime)
-    {
-        bool anyExpired = false;
+    //    speed = baseSpeed * speedMult;
+    //    jumpForce = baseJumpForce * jumpMult;
+    //    maxHorizontalSpeed = baseMaxHorizontalSpeed * maxSpeedMult;
+    //    Debug.Log(speed);
+    //    transform.localScale = baseScale * sizeMult;
+    //    rb.mass = baseMass * sizeMult;
+    //    RecalculateRadius();
+    //}
+    //void TickBoosts(float deltaTime)
+    //{
+    //    bool anyExpired = false;
 
-        for (int i = activeBoosts.Count - 1; i >= 0; i--)
-        {
-            activeBoosts[i].remainingTime -= deltaTime;
-            if (activeBoosts[i].remainingTime <= 0f)
-            {
-                activeBoosts.RemoveAt(i);
-                anyExpired = true;
-            }
-        }
+    //    for (int i = //activeboosts.Count - 1; i >= 0; i--)
+    //    {
+    //        //activeboosts[i].remainingTime -= deltaTime;
+    //        if (//activeboosts[i].remainingTime <= 0f)
+    //        {
+    //            //activeboosts.RemoveAt(i);
+    //            anyExpired = true;
+    //        }
+    //    }
 
-        if (anyExpired) RecalculateStats();
-    }
+    //    if (anyExpired) RecalculateStats();
+    //}
 
 
     public GameObject FindClosestTargetInFront(float searchRadius)
@@ -325,7 +325,7 @@ public class BallController : NetworkBehaviour
     {
         rb.angularDamping = airAngularDrag;
         baseScale = transform.localScale;
-        RecalculateStats();
+        //RecalculateStats();
     }
     void Update()
     {
@@ -391,7 +391,7 @@ public class BallController : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void PhysicsCalculationsRpc(Vector3 torqueAxis, float verticalVelocity, Vector3 delta, Vector3 surfaceNormal)
     {
-        TickBoosts(Time.fixedDeltaTime);
+        //TickBoosts(Time.fixedDeltaTime);
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         float angularSpeed = 0f;
         if (!currentIsSlipping && horizontalVelocity.magnitude > 0.01f)

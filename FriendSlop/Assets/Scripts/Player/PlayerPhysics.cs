@@ -12,7 +12,6 @@ public class PlayerPhysics : NetworkBehaviour
 
     #region ========== Physics calculation values =======
     [SerializeField] float airControl = 0.5f;
-    [SerializeField] float maxHorizontalSpeed = 5f;
     [SerializeField] float maxVerticalSpeed = 50f;
     [SerializeField] float maxAngularVelocity = 1f;
     //Percentage of max climbable angle at which the helper force starts tapering off significantly(basically you stop being able to climb)
@@ -33,6 +32,14 @@ public class PlayerPhysics : NetworkBehaviour
     Vector3 externalVelocity = Vector3.zero;
 
     bool justLanded = false;
+    #endregion
+
+    #region ========== Facing direction (for aim-based abilities) =============
+    [SerializeField] float frontSmoothSpeed = 8f;
+    [SerializeField] Transform frontIndicator;
+
+    public Vector3 Front { get; private set; } = Vector3.forward;
+    Vector3 lastInputDir = Vector3.forward;
     #endregion
 
     #region ========== Public external-velocity accessors =============
@@ -80,6 +87,59 @@ public class PlayerPhysics : NetworkBehaviour
     public void SetMovementDelta(Vector3 delta)
     {
         movementDir = delta.normalized;
+
+        if (delta.sqrMagnitude > 0.0001f)
+        {
+            lastInputDir = movementDir;
+        }
+    }
+
+    public GameObject FindClosestTargetInFront(float searchRadius)
+    {
+        Vector3 origin = transform.position;
+        Collider[] candidates = Physics.OverlapSphere(origin, searchRadius);
+
+        GameObject closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var col in candidates)
+        {
+            if (col.gameObject == gameObject) continue;
+            if (col.attachedRigidbody == null) continue;
+
+            Vector3 toTarget = col.transform.position - origin;
+            toTarget.y = 0;
+
+            if (toTarget.magnitude < 0.01f) continue;
+
+            Vector3 dirToTarget = toTarget.normalized;
+            float dot = Vector3.Dot(Front, dirToTarget);
+
+            if (dot > 0f)
+            {
+                float dist = toTarget.magnitude;
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closest = col.gameObject;
+                }
+            }
+        }
+        return closest;
+    }
+
+    private void LateUpdate()
+    {
+
+        Front = Vector3.Slerp(Front, lastInputDir, frontSmoothSpeed * Time.deltaTime);
+
+        if (frontIndicator != null)
+        {
+            Vector3 targetPos = transform.position + Front * stats.GetBallRadius();
+            Quaternion targetRot = Quaternion.LookRotation(Front, Vector3.up);
+            frontIndicator.position = targetPos;
+            frontIndicator.rotation = targetRot;
+        }
     }
 
     //used for any external forces (amount of force, force type)
@@ -222,7 +282,7 @@ public class PlayerPhysics : NetworkBehaviour
 
         Vector3 horizontal = new Vector3(velocity.x, 0, velocity.z);
         float horizontalExternalMag = new Vector3(externalVelocity.x, 0, externalVelocity.z).magnitude;
-        float effectiveHorizontalCap = maxHorizontalSpeed + horizontalExternalMag;
+        float effectiveHorizontalCap = stats.GetMaxHorizontalSpeed() + horizontalExternalMag;
 
         bool horizontalClamped = horizontal.magnitude > effectiveHorizontalCap;
         if (horizontalClamped)

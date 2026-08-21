@@ -1,9 +1,7 @@
 using UnityEngine;
 public class SurfaceController : MonoBehaviour
 {
-    [Tooltip("Contacts steeper than this angle (degrees from straight up) are treated as walls, not floor/slopes, and don't count as ground contact or apply surface data. Also used by PlayerPhysics as the single climbability threshold: climb strength scales to zero at exactly this angle.")]
     public float maxSurfaceAngle = 60f;
-    [Tooltip("Maps PhysicsMaterial assets to SurfaceData for floors that don't have a SurfaceIdentifier component.")]
     [SerializeField] SurfaceMaterialRegistry surfaceRegistry;
     private PlayerStats stats;
     public Vector3 currentPlatformVelocity = Vector3.zero;

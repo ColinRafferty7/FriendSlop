@@ -1,6 +1,5 @@
 using UnityEngine;
 using Unity.Netcode;
-
 public class TimedBoostPickup : NetworkBehaviour
 {
     [SerializeField] StatType statType;
@@ -9,13 +8,13 @@ public class TimedBoostPickup : NetworkBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (!IsServer) return; 
+        if (!IsServer) return;
 
-        BallController ball = other.GetComponent<BallController>();
-        if (ball != null)
+        PlayerStats stats = other.GetComponentInParent<PlayerStats>();
+        if (stats != null)
         {
-            ball.ApplyTimedBoost(statType, multiplier, duration); 
-            NetworkObject.Despawn(); 
+            stats.ApplyTimedBoost(statType, multiplier, duration);
+            NetworkObject.Despawn();
         }
     }
 }

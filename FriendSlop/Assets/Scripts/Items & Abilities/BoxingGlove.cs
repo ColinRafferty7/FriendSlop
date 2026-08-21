@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class BoxingGlove : AbilityBase
 {
     public override AbilityType Type => AbilityType.Active;
@@ -8,14 +7,13 @@ public class BoxingGlove : AbilityBase
     [SerializeField] float speed = 5f;
     [SerializeField] float spawnOffsetMultiplier = 1.3f;
     [SerializeField] GameObject glovePrefab;
-
     public override void Activate(GameObject user)
     {
-        BallController ball = user.GetComponent<BallController>();
-        if (ball == null || glovePrefab == null) return;
+        PlayerPhysics physics = user.GetComponent<PlayerPhysics>();
+        PlayerStats stats = user.GetComponent<PlayerStats>();
+        if (physics == null || stats == null || glovePrefab == null) return;
 
-        GameObject target = ball.FindClosestTargetInFront(range);
-
+        GameObject target = physics.FindClosestTargetInFront(range);
         Vector3 direction;
         if (target != null)
         {
@@ -25,11 +23,10 @@ public class BoxingGlove : AbilityBase
         }
         else
         {
-            direction = ball.Front;
+            direction = physics.Front;
         }
-
         GameObject gloveObj = Instantiate(glovePrefab, user.transform.position, Quaternion.LookRotation(direction, Vector3.up));
         GloveProjectile glove = gloveObj.GetComponent<GloveProjectile>();
-        glove.Init(user, direction, pushForce, range, speed, ball.BallRadius, spawnOffsetMultiplier);
+        glove.Init(user, direction, pushForce, range, speed, stats.GetBallRadius(), spawnOffsetMultiplier);
     }
 }
