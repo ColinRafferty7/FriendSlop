@@ -11,6 +11,7 @@ public class Reticle : MonoBehaviour
 
     void LateUpdate()
     {
+        if (target == null) return; 
         transform.position = target.transform.position - (Vector3.down * target.transform.localScale.x);
     }
 }

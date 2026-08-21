@@ -1,7 +1,6 @@
 using System;
 using UnityEditor;
 using UnityEngine;
-using UnityEditor;
 
 // This script is meant to make it easier to create spawn point scribtable objects
 // Instead of typing in all the vectors manually, create an object containing this script

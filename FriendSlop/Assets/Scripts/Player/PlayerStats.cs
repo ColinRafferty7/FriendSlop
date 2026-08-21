@@ -1,7 +1,6 @@
 using NUnit.Framework.Internal.Commands;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
 using UnityEngine;
 using static BallController;
 
@@ -22,8 +21,6 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float linearFriction = 1f;
     [SerializeField] private float angularFriction = 1f;
     [SerializeField] private float gravityMultiplier = 1f;
-
-    List<ActiveBoost> activeBoosts = new List<ActiveBoost>();
     [SerializeField] private float baseMaxHorizontalSpeed = 5f;
     #endregion
 
@@ -58,17 +55,17 @@ public class PlayerStats : MonoBehaviour
 
     public void ActivateBoost(StatType statType, float multiplier, float duration)
     {
-        StartCoroutine(ApplyTimedBoost(statType, multiplier, duration));
+        //StartCoroutine(ApplyTimedBoost(statType, multiplier, duration));
     }
 
     // Change later to add time to already active boosts
     // Deleted that previous logic to make code cleaner
-    public IEnumerator ApplyTimedBoost(StatType statType, float multiplier, float duration)
-    {
-        ApplyBoost(statType, multiplier);
-        yield return new WaitForSeconds(duration);
-        ApplyBoost(statType, 1f / multiplier);
-    }
+    //public IEnumerator ApplyTimedBoost(StatType statType, float multiplier, float duration)
+    //{
+    //    ApplyBoost(statType, multiplier);
+    //    yield return new WaitForSeconds(duration);
+    //    ApplyBoost(statType, 1f / multiplier);
+    //}
 
     private void ApplyBoost(StatType statType, float multiplier)
     {

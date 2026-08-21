@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ public class NetworkUpdateMonitor : NetworkBehaviour
     private float longupdates;
 
     private double lastTime;
+    private Vector3 lastPos;
+
+    private NetworkVariable<int> tick = new(0);
 
     void Start()
     {
@@ -25,14 +29,18 @@ public class NetworkUpdateMonitor : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+
         NetworkManager.Singleton.NetworkTickSystem.Tick += Tick;
     }
     
     public void Tick()
     {
-        Debug.Log($"Tick Time: {(NetworkManager.Singleton.ServerTime.Time - lastTime) * 1000f:F4}");
+        if (OwnerClientId == 0) return;
+        //Debug.Log($"Tick Time: {(NetworkManager.Singleton.ServerTime.Time - lastTime) * 1000f:F4}");
         lastTime = NetworkManager.Singleton.ServerTime.Time;
-        
+        if (IsServer) tick.Value++;
+        Debug.Log($"Tick {tick.Value}: {(lastPos - transform.position).magnitude:F3}");
+        lastPos = transform.position;
     }
 
     void Update()

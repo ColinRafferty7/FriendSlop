@@ -1,6 +1,5 @@
 using UnityEngine;
 using Unity.Netcode;
-using UnityEditor.U2D;
 
 public class PlayerPhysics : NetworkBehaviour
 {
