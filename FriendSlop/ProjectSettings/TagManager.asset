@@ -42,6 +42,10 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Lines
+    uniqueID: 3598610855
+    locked: 0
   m_RenderingLayers:
   - Default
+  - Lines
   m_MigratedRenderPipelines: []
