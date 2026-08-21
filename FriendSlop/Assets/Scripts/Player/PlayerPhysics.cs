@@ -35,6 +35,14 @@ public class PlayerPhysics : NetworkBehaviour
     bool justLanded = false;
     #endregion
 
+    #region ========== Facing direction (for aim-based abilities) =============
+    [SerializeField] float frontSmoothSpeed = 8f;
+    [SerializeField] Transform frontIndicator;
+
+    public Vector3 Front { get; private set; } = Vector3.forward;
+    Vector3 lastInputDir = Vector3.forward;
+    #endregion
+
     #region ========== Public external-velocity accessors =============
     //trackers for external velocity in case we need to use them for non-physics purposes
     public Vector3 ExternalVelocity => externalVelocity;
@@ -79,6 +87,59 @@ public class PlayerPhysics : NetworkBehaviour
     public void SetMovementDelta(Vector3 delta)
     {
         movementDir = delta.normalized;
+
+        if (delta.sqrMagnitude > 0.0001f)
+        {
+            lastInputDir = movementDir;
+        }
+    }
+
+    public GameObject FindClosestTargetInFront(float searchRadius)
+    {
+        Vector3 origin = transform.position;
+        Collider[] candidates = Physics.OverlapSphere(origin, searchRadius);
+
+        GameObject closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var col in candidates)
+        {
+            if (col.gameObject == gameObject) continue;
+            if (col.attachedRigidbody == null) continue;
+
+            Vector3 toTarget = col.transform.position - origin;
+            toTarget.y = 0;
+
+            if (toTarget.magnitude < 0.01f) continue;
+
+            Vector3 dirToTarget = toTarget.normalized;
+            float dot = Vector3.Dot(Front, dirToTarget);
+
+            if (dot > 0f)
+            {
+                float dist = toTarget.magnitude;
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closest = col.gameObject;
+                }
+            }
+        }
+        return closest;
+    }
+
+    private void LateUpdate()
+    {
+
+        Front = Vector3.Slerp(Front, lastInputDir, frontSmoothSpeed * Time.deltaTime);
+
+        if (frontIndicator != null)
+        {
+            Vector3 targetPos = transform.position + Front * stats.GetBallRadius();
+            Quaternion targetRot = Quaternion.LookRotation(Front, Vector3.up);
+            frontIndicator.position = targetPos;
+            frontIndicator.rotation = targetRot;
+        }
     }
 
     //used for any external forces (amount of force, force type)

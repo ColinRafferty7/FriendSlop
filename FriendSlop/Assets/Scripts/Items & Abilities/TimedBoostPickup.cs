@@ -10,11 +10,9 @@ public class TimedBoostPickup : NetworkBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (!IsServer) return; 
-
         if (other.TryGetComponent<PlayerStats>(out PlayerStats stats))
         {
-            stats.ActivateBoost(statType, multiplier, duration); 
+            stats.ApplyTimedBoost(statType, multiplier, duration); 
             NetworkObject.Despawn(); 
         }
     }

@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class HookAbility : AbilityBase
 {
     public override AbilityType Type => AbilityType.Active;
@@ -7,14 +6,13 @@ public class HookAbility : AbilityBase
     [SerializeField] float speed = 6f;
     [SerializeField] float spawnOffsetMultiplier = 1.3f;
     [SerializeField] GameObject hookPrefab;
-
     public override void Activate(GameObject user)
     {
-        BallController ball = user.GetComponent<BallController>();
-        if (ball == null || hookPrefab == null) return;
+        PlayerPhysics physics = user.GetComponent<PlayerPhysics>();
+        PlayerStats stats = user.GetComponent<PlayerStats>();
+        if (physics == null || stats == null || hookPrefab == null) return;
 
-        GameObject target = ball.FindClosestTargetInFront(range);
-
+        GameObject target = physics.FindClosestTargetInFront(range);
         Vector3 direction;
         if (target != null)
         {
@@ -24,11 +22,10 @@ public class HookAbility : AbilityBase
         }
         else
         {
-            direction = ball.Front;
+            direction = physics.Front;
         }
-
         GameObject hookObj = Instantiate(hookPrefab, user.transform.position, Quaternion.LookRotation(direction, Vector3.up));
         HookProjectile hook = hookObj.GetComponent<HookProjectile>();
-        hook.Init(user, direction, range, speed, ball.BallRadius, spawnOffsetMultiplier);
+        hook.Init(user, direction, range, speed, stats.GetBallRadius(), spawnOffsetMultiplier);
     }
 }
