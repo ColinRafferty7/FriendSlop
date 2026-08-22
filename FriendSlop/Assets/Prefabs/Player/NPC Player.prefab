@@ -18,10 +18,7 @@ GameObject:
   - component: {fileID: 3598907809610354360}
   - component: {fileID: 2730707944949056865}
   - component: {fileID: 5356237083309898563}
-  - component: {fileID: 2701390570950025258}
-  - component: {fileID: 454588005901158667}
   - component: {fileID: 5581397215555265286}
-  - component: {fileID: 5880812164386676904}
   m_Layer: 0
   m_Name: NPC Player
   m_TagString: Untagged
@@ -264,6 +261,8 @@ MonoBehaviour:
   maxAngularVelocity: 20
   climbTaperStartFraction: 0.75
   inputSmoothTime: 0.01
+  frontSmoothSpeed: 8
+  frontIndicator: {fileID: 0}
 --- !u!114 &5356237083309898563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,33 +283,7 @@ MonoBehaviour:
   linearFriction: 1
   angularFriction: 1
   gravityMultiplier: 1
---- !u!114 &2701390570950025258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584579716311631968}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82dda1895b130904c8b9d46a1b6e1fce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraTarget
-  ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &454588005901158667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584579716311631968}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a08d2ebf8edb2a14485cd9b55fb686bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerItems
-  maxOwnedAbilities: 3
-  replaceOldestWhenFull: 1
+  baseMaxHorizontalSpeed: 5
 --- !u!114 &5581397215555265286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,26 +305,6 @@ MonoBehaviour:
   currentWallSurfaceData: {fileID: 0}
   wallSurfaceType: 0
   groundContacts: 0
---- !u!114 &5880812164386676904
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584579716311631968}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9840cec76c0ccac4f8719dcea759a4d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AuthorityManager
-  ShowTopMostFoldoutHeaderGroup: 1
-  componentMode: 1
-  componentList:
-  - {fileID: 2730707944949056865}
-  - {fileID: 5356237083309898563}
-  - {fileID: 5581397215555265286}
-  - {fileID: 2701390570950025258}
-  - {fileID: 454588005901158667}
 --- !u!1 &4164343838412741145
 GameObject:
   m_ObjectHideFlags: 0

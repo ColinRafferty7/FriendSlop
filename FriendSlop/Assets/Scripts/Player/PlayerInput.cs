@@ -62,19 +62,28 @@ public class PlayerInput : NetworkBehaviour
     private void ReadItemInputs()
     {
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            AimItemRpc();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             ActivateItemRpc();
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            SwapAbilityRpc(1);
+            //SwapAbilityRpc(1);
         }
         else if (Input.GetKeyDown(KeyCode.E))
         {
-            SwapAbilityRpc(-1);
+            //SwapAbilityRpc(-1);
         }
 
+    }
+    [Rpc(SendTo.Server)]
+    public void AimItemRpc()
+    {
+        items.AttemptAim();
     }
 
     [Rpc(SendTo.Server)]

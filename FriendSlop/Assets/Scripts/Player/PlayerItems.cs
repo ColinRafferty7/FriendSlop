@@ -10,6 +10,16 @@ public class PlayerItems : MonoBehaviour
     AbilityBase currentAbility;
     float cooldownTimer = 0f;
 
+    [SerializeField] private GameObject reticlePrefab;
+    private Reticle reticle;
+
+    void Awake()
+    {
+        GameObject retObj = Instantiate(reticlePrefab, Vector3.zero, Quaternion.identity);
+        reticle = retObj.GetComponent<Reticle>();
+        reticle.gameObject.SetActive(false);
+    }
+
     void Update()
     {
         if (cooldownTimer > 0f)
@@ -18,11 +28,21 @@ public class PlayerItems : MonoBehaviour
         }
     }
 
+    public void AttemptAim()
+    {
+        if (currentAbility != null && cooldownTimer <= 0f &&
+            (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
+        {
+            currentAbility.Aim(gameObject, reticle);
+        }
+    }
+
     public void AttemptActivation()
     {
         if (currentAbility != null && cooldownTimer <= 0f &&
             (currentAbility.Type == AbilityType.Active || currentAbility.Type == AbilityType.ActiveAndPassive))
         {
+            reticle.gameObject.SetActive(false);
             currentAbility.Activate(gameObject);
             cooldownTimer = currentAbility.Cooldown;
         }

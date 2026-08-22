@@ -7,6 +7,19 @@ public class BoxingGlove : AbilityBase
     [SerializeField] float speed = 5f;
     [SerializeField] float spawnOffsetMultiplier = 1.3f;
     [SerializeField] GameObject glovePrefab;
+
+    public override void Aim(GameObject user, Reticle ret)
+    {
+        ret.gameObject.SetActive(true);
+        GameObject target = PlayerItems.ClosestTarget(user.transform, range);
+        if (target == null)
+        {
+            ret.gameObject.SetActive(false);
+            return;
+        }
+        ret.SetTarget(target);
+    }
+
     public override void Activate(GameObject user)
     {
         GameObject target = PlayerItems.ClosestTarget(user.transform, range);
@@ -17,9 +30,7 @@ public class BoxingGlove : AbilityBase
         Vector3 direction;
         if (target != null)
         {
-            direction = target.transform.position - user.transform.position;
-            direction.y = 0;
-            direction.Normalize();
+            direction = (target.transform.position - user.transform.position).normalized;
         }
         else return;
         

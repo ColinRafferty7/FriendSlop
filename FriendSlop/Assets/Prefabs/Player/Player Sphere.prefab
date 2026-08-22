@@ -441,6 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItems
   maxOwnedAbilities: 3
   replaceOldestWhenFull: 1
+  reticlePrefab: {fileID: 230251301401626933, guid: e8d7ab6fc5b69ba4096d7b92223f9fb2, type: 3}
 --- !u!114 &4204856728868956354
 MonoBehaviour:
   m_ObjectHideFlags: 0
