@@ -16,17 +16,23 @@ public class PlayerInput : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         if (!IsOwner && !IsServer) Destroy(this);
+        NetworkManager.Singleton.NetworkTickSystem.Tick += NetworkTick;
     }
 
     private void Update()
     {
         if (!IsOwner) return;
 
-        ReadMovementDir();
-
         ReadJumpInput();
 
         ReadItemInputs();
+    }
+
+    private void NetworkTick()
+    {
+        if (!IsOwner) return;
+
+        ReadMovementDir();
     }
 
     private void ReadMovementDir()

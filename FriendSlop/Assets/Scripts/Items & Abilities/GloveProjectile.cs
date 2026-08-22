@@ -65,7 +65,6 @@ public class GloveProjectile : MonoBehaviour
         alreadyHit.Add(otherRb);
 
         Vector3 hitDir = (other.transform.position - transform.position).normalized;
-        hitDir.y = 0;
         hitDir.Normalize();
 
         otherRb.AddForce(hitDir * pushForce, ForceMode.Impulse);
